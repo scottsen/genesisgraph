@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    name: Test Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev,cli]"
+
+    - name: Lint with ruff
+      run: |
+        ruff check genesisgraph/
+
+    - name: Type check with mypy
+      run: |
+        mypy genesisgraph/ --ignore-missing-imports
+      continue-on-error: true
+
+    - name: Run tests
+      run: |
+        pytest tests/ -v --cov=genesisgraph --cov-report=xml --cov-report=term
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == '3.11'
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: false
+
+  validate-examples:
+    name: Validate Example Files
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install package
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[cli]"
+
+    - name: Validate Level A example
+      run: |
+        python -m genesisgraph.cli validate examples/level-a-full-disclosure.gg.yaml
+
+    - name: Validate Level B example
+      run: |
+        python -m genesisgraph.cli validate examples/level-b-partial-envelope.gg.yaml
+
+    - name: Validate Level C example
+      run: |
+        python -m genesisgraph.cli validate examples/level-c-sealed-subgraph.gg.yaml
+
+    - name: Run verification scripts
+      run: |
+        python scripts/verify_sealed_subgraph.py examples/level-c-sealed-subgraph.gg.yaml
+        python scripts/verify_transparency_anchoring.py examples/level-b-partial-envelope.gg.yaml
+
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install build twine
+
+    - name: Build package
+      run: |
+        python -m build
+
+    - name: Check package
+      run: |
+        twine check dist/*
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: dist
+        path: dist/
