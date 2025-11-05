@@ -1,0 +1,179 @@
+# GenesisGraph Example: Level B — Partial Attestation Envelope
+# Use case: AI inference with hidden prompt engineering, but policy compliance exposed
+# Parameters redacted; policy claims and compliance results visible
+
+spec_version: 0.1.0
+
+profile: gg-ai-basic-v1
+
+imports:
+  - https://genesisgraph.dev/ns/core/0.1
+  - https://genesisgraph.dev/ns/ai/0.1
+
+namespaces:
+  ai: https://genesisgraph.dev/ns/ai/0.1
+
+context:
+  environment: docker://ubuntu:22.04@sha256:abc123def456
+  hardware: nvidia_a100
+  location: datacenter-us-west-2
+  # Software environment details redacted
+
+tools:
+  - id: proprietary_retrieval
+    type: Software
+    vendor: InternalAI
+    version: 3.2.1
+    # Capability details redacted
+    identity:
+      did: did:svc:retrieval-prod
+
+  - id: llama3_70b
+    type: AIModel
+    vendor: Meta
+    version: 3.0
+    identity:
+      did: did:model:llama3-70b-instruct
+
+  - id: proprietary_moderation
+    type: Software
+    vendor: InternalAI
+    version: 2.1.0
+    identity:
+      did: did:svc:moderation-prod
+
+  - id: clinician_reviewer
+    type: Human
+    identity:
+      did: did:person:dr_sarah_chen
+      certificate: "Medical License CA-MD-98765"
+
+entities:
+  - id: medical_corpus
+    type: Dataset
+    version: 2025-10-15
+    # URI redacted for IP protection
+    hash: sha256:a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
+
+  - id: retrieval_results
+    type: Dataset
+    version: "1"
+    hash: sha256:f1e2d3c4b5a6978899001122334455667788990011223344556677889900aabb
+    derived_from: [medical_corpus@2025-10-15]
+
+  - id: raw_answer
+    type: Text
+    version: "1"
+    hash: sha256:fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321
+    derived_from: [retrieval_results@1]
+
+  - id: moderated_answer
+    type: Text
+    version: "1"
+    hash: sha256:aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899
+    derived_from: [raw_answer@1]
+
+  - id: final_answer
+    type: Text
+    version: "1"
+    hash: sha256:99887766554433221100ffeeddccbbaa99887766554433221100ffeeddccbbaa
+    derived_from: [moderated_answer@1]
+
+operations:
+  - id: op_retrieval_001
+    type: ai_retrieval
+    inputs: [medical_corpus@2025-10-15]
+    outputs: [retrieval_results@1]
+    tool: proprietary_retrieval@3.2.1
+    parameters:
+      _redacted: true
+    # Metrics redacted to protect retrieval strategy
+    attestation:
+      mode: signed
+      signer: did:svc:retrieval-prod
+      signature: ed25519:sig1_aabbccdd
+      timestamp: 2025-10-31T14:23:11Z
+      claims:
+        policy: gg-ai-basic-v1
+        results:
+          max_results: {lte: 20, satisfied: true}
+          similarity_threshold: {gte: 0.7, satisfied: true}
+          corpus_approved: {result: "pass"}
+
+  - id: op_inference_001
+    type: ai_inference
+    inputs: [retrieval_results@1]
+    outputs: [raw_answer@1]
+    tool: llama3_70b@3.0
+    parameters:
+      _redacted: true
+    fidelity:
+      expected: lossless
+    attestation:
+      mode: signed
+      signer: did:model:llama3-70b-instruct
+      signature: ed25519:sig2_eeffaabb
+      timestamp: 2025-10-31T14:23:13Z
+      claims:
+        policy: gg-ai-basic-v1
+        results:
+          prompt_length_chars: {lte: 4000, satisfied: true}
+          temperature: {lte: 0.3, satisfied: true}
+          max_tokens: {lte: 1024, satisfied: true}
+          system_prompt_approved: {category: "medical", result: "pass"}
+      transparency:
+        - log_id: did:log:internal-audit
+          entry_id: 0x5f2c8a91
+          tree_size: 428934
+          inclusion_proof: base64:MIIBCAYDVR0RBAwwCoIIbG9jYWxob3N0MIIBCgYJKoZI...
+    resource_usage:
+      cpu_seconds: 0.8
+      gpu_ms: 1823
+      energy_kj_estimate: 12.4
+
+  - id: op_moderation_001
+    type: ai_moderation
+    inputs: [raw_answer@1]
+    outputs: [moderated_answer@1]
+    tool: proprietary_moderation@2.1.0
+    parameters:
+      _redacted: true
+    attestation:
+      mode: signed
+      signer: did:svc:moderation-prod
+      signature: ed25519:sig3_11223344
+      timestamp: 2025-10-31T14:23:14Z
+      claims:
+        policy: gg-ai-basic-v1
+        results:
+          moderation: {category: "medical", result: "pass"}
+          harmful_content: {category: "safety", result: "pass"}
+          confidence: {gte: 0.85, satisfied: true}
+
+  - id: op_human_review_001
+    type: human_review
+    inputs: [moderated_answer@1]
+    outputs: [final_answer@1]
+    tool: clinician_reviewer@
+    parameters:
+      review_type: medical_accuracy
+      approval_granted: true
+    metrics:
+      review_time_seconds: 142
+    attestation:
+      mode: verifiable
+      signer: did:person:dr_sarah_chen
+      signature: ed25519:sig4_aabbccdd99887766
+      timestamp: 2025-10-31T14:25:36Z
+      delegation: did:org:hospital-system-west
+      transparency:
+        - log_id: did:log:internal-audit
+          entry_id: 0x5f2d1b42
+          tree_size: 428935
+          inclusion_proof: base64:MIIBDgYDVR0PAQH/BAQDAgeAMB0GA1UdJQQWMBQGCCsG...
+
+metadata:
+  request_id: req-2025-10-31-14-23-11-xyz
+  compliance_framework: HIPAA
+  disclosure_level: partial_envelope
+  auditor_access: policy_claims_only

@@ -1,0 +1,257 @@
+# GenesisGraph Example: Level C — Sealed Subgraph
+# Use case: Manufacturing with proprietary toolpath generation
+# Entire proprietary pipeline segment sealed; only inputs, outputs, and policy compliance visible
+
+spec_version: 0.1.0
+
+profile: gg-cam-v1
+
+imports:
+  - https://genesisgraph.dev/ns/core/0.1
+  - https://genesisgraph.dev/ns/cam/0.1
+
+namespaces:
+  cam: https://genesisgraph.dev/ns/cam/0.1
+
+context:
+  environment: rhel:8.5
+  location: facility-phoenix-line3
+  # Internal software stack details sealed
+
+tools:
+  - id: fusion360
+    type: Software
+    vendor: Autodesk
+    version: 2.0.16700
+    capabilities:
+      cad:
+        formats: [step, iges, stl]
+
+  - id: proprietary_cam_system
+    type: Software
+    vendor: InternalManufacturing
+    # Version and capabilities sealed to protect IP
+    identity:
+      did: did:svc:cam-phoenix
+
+  - id: haas_vf4
+    type: Machine
+    vendor: Haas
+    version: NGC-2.1
+    capabilities:
+      machining:
+        axes: 4
+        tolerance_mm: 0.01
+        materials: [Al6061, Al7075, SS316, Ti6Al4V]
+    identity:
+      did: did:machine:haas-vf4-serial-8472
+
+  - id: qc_inspector
+    type: Human
+    identity:
+      did: did:person:inspector_james_wong
+      certificate: "ASQ-CQI-12345"
+
+entities:
+  - id: bracket_cad
+    type: CADModel
+    version: 3.1.2
+    file: ./models/bracket_v3.1.2.step
+    hash: sha256:1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b
+
+  - id: bracket_mesh
+    type: Mesh
+    version: "5"
+    # File path hidden (internal storage)
+    hash: sha256:5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6
+    derived_from: [bracket_cad@3.1.2]
+
+  - id: gcode_final
+    type: GCode
+    version: "1"
+    # Content sealed to protect toolpath IP
+    hash: sha256:9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8
+    derived_from: [bracket_mesh@5]
+
+  - id: machined_part
+    type: PhysicalPart
+    version: "1"
+    # Part serial number
+    uri: urn:part:serial:BRK-2025-10-31-8472-001
+    hash: sha256:measurement_profile_hash_a1b2c3d4
+    derived_from: [gcode_final@1]
+
+  - id: qc_report
+    type: InspectionReport
+    version: "1"
+    file: ./qc/BRK-2025-10-31-001.pdf
+    hash: sha256:7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8
+    derived_from: [machined_part@1]
+
+operations:
+  - id: op_tessellate_001
+    type: tessellation
+    inputs: [bracket_cad@3.1.2]
+    outputs: [bracket_mesh@5]
+    tool: fusion360@2.0.16700
+    parameters:
+      tolerance_mm: 0.05
+      max_edge_length_mm: 2.0
+    fidelity:
+      expected: geometric_approximation
+      actual:
+        tolerance_mm: 0.05
+    metrics:
+      mesh_triangles: 47234
+      mesh_vertices: 23891
+    attestation:
+      mode: signed
+      signer: did:person:cad_engineer_alice
+      signature: ed25519:sig1_cad_aabbccdd
+      timestamp: 2025-10-31T08:15:22Z
+
+  # SEALED SUBGRAPH: Proprietary CAM pipeline
+  # Hidden operations include:
+  #   - Custom toolpath optimization
+  #   - Proprietary surface finishing strategy
+  #   - Feed rate optimization algorithms
+  #   - Multi-pass roughing/finishing sequence
+  - id: op_cam_pipeline_sealed
+    type: sealed_subgraph
+    sealed:
+      merkle_root: sha256:deadbeef1234567890abcdefdeadbeef1234567890abcdefdeadbeef12345678
+      leaves_exposed:
+        - role: sub_input
+          hash: sha256:5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6
+        - role: sub_output
+          hash: sha256:9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8
+      policy_assertions:
+        - id: gg-cam-v1
+          result: pass
+          signer: did:svc:cam-phoenix
+          evidence_hash: sha256:policy_evidence_0011223344556677889900aabbccddeeff
+        - id: iso-9001-2015
+          result: pass
+          signer: did:org:facility-phoenix
+          evidence_hash: sha256:iso_audit_trail_ffeeddccbbaa00998877665544332211
+        - id: as9100d-aerospace
+          result: pass
+          signer: did:org:facility-phoenix
+          evidence_hash: sha256:aerospace_cert_11223344556677889900aabbccddeeff00
+    attestation:
+      mode: verifiable
+      signer: did:svc:cam-phoenix
+      signature: ed25519:sig2_cam_sealed_ffeeddccbbaa
+      timestamp: 2025-10-31T09:42:15Z
+      delegation: did:org:facility-phoenix
+      transparency:
+        - log_id: did:log:manufacturing-audit
+          entry_id: 0xa1b2c3d4
+          tree_size: 892347
+          inclusion_proof: base64:MIICDzCCAbWgAwIBAgIUFmNj2fDq6vN6P5...
+        - log_id: did:log:aerospace-compliance
+          entry_id: 0xe5f6a7b8
+          tree_size: 134829
+          inclusion_proof: base64:MIICEjCCAbegAwIBAgIUQr7Xq8vT9mK5R2...
+      multisig:
+        threshold: 2
+        signers:
+          - did:svc:cam-phoenix
+          - did:person:cam_lead_engineer
+          - did:person:quality_manager
+    # TEE attestation for secure toolpath generation
+    attestation:
+      tee:
+        technology: intel_sgx
+        mr_enclave: 0x8f7e6d5c4b3a29180f7e6d5c4b3a29180f7e6d5c4b3a29180f7e6d5c4b3a2918
+        quote: base64:AwACAAAAAAAFAAoAk5pyM/ecTKmUCg2zlX8GBwAAAAAAAAAAAAAAAAAAAAAA...
+        binds:
+          inputs_root: sha256:5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6
+          code_hash: sha256:cam_software_hash_0123456789abcdef
+    resource_usage:
+      cpu_seconds: 847.3
+      memory_mb: 8192
+    work_proof:
+      type: vdf_wesolowski
+      difficulty: "2^28"
+      input: sha256:5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6
+      output: base64:VkRGUHJvb2ZPdXRwdXQ=...
+      verifier: wesolowski-v1
+
+  - id: op_machine_001
+    type: cnc_machining
+    inputs: [gcode_final@1]
+    outputs: [machined_part@1]
+    tool: haas_vf4@NGC-2.1
+    parameters:
+      material: Al7075-T6
+      coolant: flood
+      fixture_id: FIX-BRK-001
+    fidelity:
+      expected: lossless
+      actual:
+        tolerance_mm: 0.008
+        surface_finish_ra_um: 0.6
+    metrics:
+      cycle_time_minutes: 42.3
+      tool_changes: 5
+      spindle_hours: 0.71
+    attestation:
+      mode: signed
+      signer: did:machine:haas-vf4-serial-8472
+      signature: ed25519:sig3_machine_99887766
+      timestamp: 2025-10-31T10:27:38Z
+      transparency:
+        - log_id: did:log:manufacturing-audit
+          entry_id: 0xa1b2c3d5
+          tree_size: 892348
+          inclusion_proof: base64:MIICEDCCAbagAwIBAgIUH8jK3vP7qN9...
+    reproducibility:
+      expected_output_hash: sha256:measurement_profile_hash_a1b2c3d4
+      deterministic: false
+      tolerance:
+        dimension_mm: 0.02
+        surface_ra_um: 0.2
+    resource_usage:
+      energy_kj_estimate: 15840
+
+  - id: op_qc_inspection_001
+    type: quality_inspection
+    inputs: [machined_part@1]
+    outputs: [qc_report@1]
+    tool: qc_inspector@
+    parameters:
+      inspection_type: first_article
+      measurement_points: 28
+      cmm_program: BRK-CMM-v3.1.2
+    metrics:
+      measurement_time_minutes: 18
+      out_of_tolerance_points: 0
+      max_deviation_mm: 0.006
+    attestation:
+      mode: verifiable
+      signer: did:person:inspector_james_wong
+      signature: ed25519:sig4_qc_aabbccddee
+      timestamp: 2025-10-31T11:15:04Z
+      delegation: did:org:facility-phoenix
+      claims:
+        policy: as9100d-aerospace
+        results:
+          dimensional_tolerance: {result: "pass", confidence: 1.0}
+          surface_finish: {result: "pass", measured_ra_um: 0.6}
+          material_cert: {result: "pass"}
+      transparency:
+        - log_id: did:log:aerospace-compliance
+          entry_id: 0xe5f6a7b9
+          tree_size: 134830
+          inclusion_proof: base64:MIICETCCAbigAwIBAgIUVn8Rx2tK5...
+
+metadata:
+  work_order: WO-2025-10-31-BRK-001
+  customer: AerospaceCorp
+  part_number: BRK-7075-001-A
+  compliance_frameworks: [ISO-9001, AS9100D]
+  disclosure_level: sealed_subgraph
+  proprietary_claim: "CAM toolpath generation algorithms are trade secrets"
+  auditor_access: policy_compliance_and_hashes_only
+  retention_policy: 25_years

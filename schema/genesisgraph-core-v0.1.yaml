@@ -1,0 +1,439 @@
+# GenesisGraph Core Schema v0.1.0
+# JSON Schema in YAML format
+# License: Apache 2.0
+
+$schema: "http://json-schema.org/draft-07/schema#"
+$id: "https://genesisgraph.dev/schema/core/0.1"
+title: GenesisGraph Core Schema
+version: 0.1.0
+
+definitions:
+  # Common types
+  hash:
+    type: string
+    pattern: "^(sha256|sha512|blake3):[a-f0-9]+$"
+    description: "Cryptographic hash with algorithm prefix"
+
+  did:
+    type: string
+    pattern: "^did:[a-z0-9]+:[a-zA-Z0-9._-]+$"
+    description: "Decentralized Identifier (DID)"
+
+  timestamp:
+    type: string
+    format: date-time
+    description: "ISO 8601 timestamp"
+
+  version:
+    type: string
+    description: "Version string (semantic or freeform)"
+
+  # Entity definition
+  entity:
+    type: object
+    required: [id, type, version]
+    properties:
+      id:
+        type: string
+        description: "Local identifier for this entity"
+      type:
+        type: string
+        description: "Entity type (e.g., CADModel, Mesh, Dataset, Model)"
+      version:
+        $ref: "#/definitions/version"
+      file:
+        type: string
+        description: "Local file path"
+      uri:
+        type: string
+        format: uri
+        description: "Remote URI"
+      hash:
+        $ref: "#/definitions/hash"
+      derived_from:
+        type: array
+        items:
+          type: string
+        description: "References to parent entities (id@version)"
+      metadata:
+        type: object
+        description: "Additional domain-specific metadata"
+    oneOf:
+      - required: [file]
+      - required: [uri]
+
+  # Tool/Agent definition
+  tool:
+    type: object
+    required: [id, type]
+    properties:
+      id:
+        type: string
+        description: "Tool identifier"
+      type:
+        type: string
+        enum: [Software, Machine, Human, AIModel, Service]
+      vendor:
+        type: string
+      version:
+        $ref: "#/definitions/version"
+      capabilities:
+        type: object
+        description: "Domain-specific capability declarations"
+      identity:
+        type: object
+        properties:
+          did:
+            $ref: "#/definitions/did"
+          certificate:
+            type: string
+        description: "Identity and trust anchors"
+      metadata:
+        type: object
+
+  # Sealed subgraph (for selective disclosure)
+  sealed_subgraph:
+    type: object
+    required: [merkle_root]
+    properties:
+      merkle_root:
+        $ref: "#/definitions/hash"
+        description: "Merkle root commitment over hidden subgraph"
+      leaves_exposed:
+        type: array
+        items:
+          type: object
+          required: [role, hash]
+          properties:
+            role:
+              type: string
+              enum: [sub_input, sub_output, intermediate]
+            hash:
+              $ref: "#/definitions/hash"
+        description: "Selectively disclosed leaf hashes"
+      policy_assertions:
+        type: array
+        items:
+          type: object
+          required: [id, result, signer]
+          properties:
+            id:
+              type: string
+              description: "Policy/profile identifier"
+            result:
+              type: string
+              enum: [pass, fail, unknown]
+            signer:
+              $ref: "#/definitions/did"
+            evidence_hash:
+              $ref: "#/definitions/hash"
+        description: "Policy compliance claims"
+
+  # Attestation claims (for partial envelopes)
+  attestation_claims:
+    type: object
+    required: [policy]
+    properties:
+      policy:
+        type: string
+        description: "Policy/profile identifier"
+      results:
+        type: object
+        description: "Claim-minimized policy check results"
+        additionalProperties:
+          oneOf:
+            - type: object
+              required: [satisfied]
+              properties:
+                lte:
+                  type: number
+                gte:
+                  type: number
+                satisfied:
+                  type: boolean
+            - type: object
+              required: [result]
+              properties:
+                category:
+                  type: string
+                result:
+                  type: string
+
+  # Transparency log entry
+  transparency_entry:
+    type: object
+    required: [log_id, entry_id, tree_size, inclusion_proof]
+    properties:
+      log_id:
+        type: string
+        description: "Log identifier (DID or URI)"
+      entry_id:
+        type: string
+        description: "Entry ID in the log"
+      tree_size:
+        type: integer
+        description: "Tree size at time of inclusion"
+      inclusion_proof:
+        type: string
+        description: "Base64-encoded inclusion proof"
+      consistency_proof:
+        type: string
+        description: "Optional consistency proof"
+
+  # TEE attestation
+  tee_attestation:
+    type: object
+    required: [technology, quote]
+    properties:
+      technology:
+        type: string
+        enum: [intel_sgx, amd_sev_snp, amd_sev_es, arm_trustzone, aws_nitro]
+      mr_enclave:
+        type: string
+        description: "Enclave measurement"
+      quote:
+        type: string
+        description: "Base64-encoded attestation quote"
+      binds:
+        type: object
+        properties:
+          inputs_root:
+            $ref: "#/definitions/hash"
+          code_hash:
+            $ref: "#/definitions/hash"
+
+  # Multi-signature
+  multisig:
+    type: object
+    required: [threshold, signers]
+    properties:
+      threshold:
+        type: integer
+        minimum: 1
+        description: "Minimum required signatures"
+      signers:
+        type: array
+        items:
+          $ref: "#/definitions/did"
+        minItems: 1
+
+  # Work proof
+  work_proof:
+    type: object
+    required: [type, input, output]
+    properties:
+      type:
+        type: string
+        enum: [vdf_wesolowski, vdf_pietrzak, hashcash, custom]
+      difficulty:
+        type: string
+        description: "Difficulty parameter"
+      input:
+        $ref: "#/definitions/hash"
+      output:
+        type: string
+        description: "Base64-encoded proof"
+      verifier:
+        type: string
+        description: "Verification algorithm identifier"
+
+  # Resource usage
+  resource_usage:
+    type: object
+    properties:
+      cpu_seconds:
+        type: number
+      gpu_ms:
+        type: number
+      memory_mb:
+        type: number
+      energy_kj_estimate:
+        type: number
+      custom_metrics:
+        type: object
+
+  # Reproducibility metadata
+  reproducibility:
+    type: object
+    properties:
+      expected_output_hash:
+        $ref: "#/definitions/hash"
+      rerun_allowed_until:
+        $ref: "#/definitions/timestamp"
+      deterministic:
+        type: boolean
+      tolerance:
+        type: object
+        description: "Acceptable variance for non-deterministic operations"
+
+  # Attestation
+  attestation:
+    type: object
+    required: [mode, timestamp]
+    properties:
+      mode:
+        type: string
+        enum: [basic, signed, verifiable, zk]
+      signer:
+        $ref: "#/definitions/did"
+      signature:
+        type: string
+        pattern: "^(ed25519|ecdsa|rsa):.+$"
+      timestamp:
+        $ref: "#/definitions/timestamp"
+      delegation:
+        $ref: "#/definitions/did"
+      claims:
+        $ref: "#/definitions/attestation_claims"
+      transparency:
+        type: array
+        items:
+          $ref: "#/definitions/transparency_entry"
+      tee:
+        $ref: "#/definitions/tee_attestation"
+      multisig:
+        $ref: "#/definitions/multisig"
+    allOf:
+      - if:
+          properties:
+            mode:
+              const: basic
+        then:
+          not:
+            required: [signer, signature]
+      - if:
+          properties:
+            mode:
+              enum: [signed, verifiable, zk]
+        then:
+          required: [signer, signature]
+
+  # Fidelity/loss tracking
+  fidelity:
+    type: object
+    properties:
+      expected:
+        type: string
+        enum:
+          - lossless
+          - geometric_approximation
+          - compression_loss
+          - summarization_loss
+          - quantization_loss
+          - sampling_loss
+          - custom
+      actual:
+        type: object
+        description: "Measured loss metrics"
+
+  # Operation
+  operation:
+    type: object
+    required: [id, type]
+    properties:
+      id:
+        type: string
+      type:
+        type: string
+        description: "Operation type or sealed_subgraph"
+      inputs:
+        type: array
+        items:
+          type: string
+        description: "Input entity references (id@version)"
+      outputs:
+        type: array
+        items:
+          type: string
+        description: "Output entity references (id@version)"
+      tool:
+        type: string
+        description: "Tool reference (id@version)"
+      parameters:
+        oneOf:
+          - type: object
+            description: "Operation parameters"
+          - type: object
+            required: [_redacted]
+            properties:
+              _redacted:
+                type: boolean
+                const: true
+      fidelity:
+        $ref: "#/definitions/fidelity"
+      metrics:
+        type: object
+        description: "Measured metrics"
+      attestation:
+        $ref: "#/definitions/attestation"
+      sealed:
+        $ref: "#/definitions/sealed_subgraph"
+      reproducibility:
+        $ref: "#/definitions/reproducibility"
+      work_proof:
+        $ref: "#/definitions/work_proof"
+      resource_usage:
+        $ref: "#/definitions/resource_usage"
+      realized_capability:
+        type: object
+        description: "Actual capability used (subset of tool capabilities)"
+      metadata:
+        type: object
+
+  # Context
+  context:
+    type: object
+    properties:
+      environment:
+        type: string
+        description: "Container or environment specification"
+      hardware:
+        type: string
+      location:
+        type: string
+      software_env:
+        type: string
+      custom:
+        type: object
+
+# Root schema
+type: object
+required: [spec_version, entities, tools, operations]
+properties:
+  spec_version:
+    type: string
+    pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+  profile:
+    type: string
+    description: "Profile identifier (e.g., gg-ai-basic-v1)"
+  imports:
+    type: array
+    items:
+      type: string
+      format: uri
+    description: "Namespace imports"
+  namespaces:
+    type: object
+    additionalProperties:
+      type: string
+      format: uri
+  context:
+    $ref: "#/definitions/context"
+  tools:
+    type: array
+    items:
+      $ref: "#/definitions/tool"
+    minItems: 1
+  entities:
+    type: array
+    items:
+      $ref: "#/definitions/entity"
+    minItems: 1
+  operations:
+    type: array
+    items:
+      $ref: "#/definitions/operation"
+    minItems: 1
+  metadata:
+    type: object
+    description: "Document-level metadata"
