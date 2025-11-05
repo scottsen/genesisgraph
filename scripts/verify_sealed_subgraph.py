@@ -206,7 +206,9 @@ class SealedSubgraphVerifier:
             messages.append(f"✓ TEE: {tech}")
             mr_enclave = tee.get('mr_enclave', '')
             if mr_enclave:
-                messages.append(f"  MR_ENCLAVE: {mr_enclave[:32]}...")
+                # Convert to string in case it's parsed as int/hex
+                mr_enclave_str = str(mr_enclave)
+                messages.append(f"  MR_ENCLAVE: {mr_enclave_str[:32]}...")
 
         return success, messages
 
