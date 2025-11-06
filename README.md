@@ -1,3 +1,20 @@
+---
+project: genesisgraph
+type: software
+status: active
+beth_topics:
+- genesisgraph
+- software
+tags:
+- provenance
+- verification
+- standard
+- compliance
+- cryptography
+- development
+- code
+---
+
 # GenesisGraph: Universal Verifiable Process Provenance
 
 **v0.1 Public Working Draft — October 2025**
