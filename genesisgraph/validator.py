@@ -35,6 +35,14 @@ except ImportError:
 
 from .errors import SchemaError, ValidationError
 
+# Security: Input size limits to prevent DoS
+MAX_ENTITIES = 10000  # Maximum number of entities in a document
+MAX_OPERATIONS = 10000  # Maximum number of operations
+MAX_TOOLS = 1000  # Maximum number of tools
+MAX_ID_LENGTH = 256  # Maximum length for IDs
+MAX_HASH_LENGTH = 512  # Maximum length for hash strings (algorithm:hexdigest)
+MAX_SIGNATURE_LENGTH = 4096  # Maximum length for signatures
+
 
 class GenesisGraphValidator:
     """
@@ -202,6 +210,11 @@ class GenesisGraphValidator:
         errors = []
         entity_ids = set()
 
+        # Security: Limit number of entities to prevent DoS
+        if len(entities) > MAX_ENTITIES:
+            errors.append(f"Too many entities: {len(entities)} (maximum {MAX_ENTITIES} allowed)")
+            return errors
+
         for i, entity in enumerate(entities):
             if not isinstance(entity, dict):
                 errors.append(f"Entity {i} must be an object")
@@ -212,6 +225,14 @@ class GenesisGraphValidator:
             if not entity_id:
                 errors.append(f"Entity {i} missing required field: id")
             else:
+                # Security: Validate ID length
+                if len(entity_id) > MAX_ID_LENGTH:
+                    errors.append(
+                        f"Entity {i} ID too long: {len(entity_id)} characters "
+                        f"(maximum {MAX_ID_LENGTH} allowed)"
+                    )
+                    continue
+
                 if entity_id in entity_ids:
                     errors.append(f"Duplicate entity id: {entity_id}")
                 entity_ids.add(entity_id)
@@ -229,6 +250,15 @@ class GenesisGraphValidator:
             # Validate hash format
             if 'hash' in entity:
                 hash_val = entity['hash']
+
+                # Security: Validate hash length
+                if len(hash_val) > MAX_HASH_LENGTH:
+                    errors.append(
+                        f"Entity '{entity_id}' hash too long: {len(hash_val)} characters "
+                        f"(maximum {MAX_HASH_LENGTH} allowed)"
+                    )
+                    continue
+
                 if not self._is_valid_hash(hash_val):
                     errors.append(f"Entity '{entity_id}' has invalid hash format: {hash_val}")
 
@@ -244,6 +274,11 @@ class GenesisGraphValidator:
         errors = []
         op_ids = set()
 
+        # Security: Limit number of operations to prevent DoS
+        if len(operations) > MAX_OPERATIONS:
+            errors.append(f"Too many operations: {len(operations)} (maximum {MAX_OPERATIONS} allowed)")
+            return errors
+
         for i, op in enumerate(operations):
             if not isinstance(op, dict):
                 errors.append(f"Operation {i} must be an object")
@@ -254,6 +289,14 @@ class GenesisGraphValidator:
             if not op_id:
                 errors.append(f"Operation {i} missing required field: id")
             else:
+                # Security: Validate ID length
+                if len(op_id) > MAX_ID_LENGTH:
+                    errors.append(
+                        f"Operation {i} ID too long: {len(op_id)} characters "
+                        f"(maximum {MAX_ID_LENGTH} allowed)"
+                    )
+                    continue
+
                 if op_id in op_ids:
                     errors.append(f"Duplicate operation id: {op_id}")
                 op_ids.add(op_id)
@@ -280,6 +323,11 @@ class GenesisGraphValidator:
         """Validate tool definitions"""
         errors = []
         tool_ids = set()
+
+        # Security: Limit number of tools to prevent DoS
+        if len(tools) > MAX_TOOLS:
+            errors.append(f"Too many tools: {len(tools)} (maximum {MAX_TOOLS} allowed)")
+            return errors
 
         for i, tool in enumerate(tools):
             if not isinstance(tool, dict):
@@ -327,15 +375,22 @@ class GenesisGraphValidator:
             else:
                 # Validate signature format
                 signature = attestation['signature']
-                if not self._is_valid_signature_format(signature):
-                    errors.append(f"{context}: invalid signature format: {signature}")
 
-                # Optionally verify signature cryptographically
-                if self.verify_signatures and operation_data:
-                    # Note: This is a basic implementation that requires public keys to be provided
-                    # In production, you'd look up keys from a key store or DID registry
-                    sig_errors = self._verify_signature(attestation, operation_data, context)
-                    errors.extend(sig_errors)
+                # Security: Validate signature length
+                if len(signature) > MAX_SIGNATURE_LENGTH:
+                    errors.append(
+                        f"{context}: signature too long: {len(signature)} characters "
+                        f"(maximum {MAX_SIGNATURE_LENGTH} allowed)"
+                    )
+                elif not self._is_valid_signature_format(signature):
+                    errors.append(f"{context}: invalid signature format: {signature}")
+                else:
+                    # Optionally verify signature cryptographically
+                    if self.verify_signatures and operation_data:
+                        # Note: This is a basic implementation that requires public keys to be provided
+                        # In production, you'd look up keys from a key store or DID registry
+                        sig_errors = self._verify_signature(attestation, operation_data, context)
+                        errors.extend(sig_errors)
 
         return errors
 
@@ -498,12 +553,27 @@ class GenesisGraphValidator:
         file_path = entity['file']
         declared_hash = entity['hash']
 
-        # Make path relative to base document
-        if not os.path.isabs(file_path):
-            doc_dir = os.path.dirname(base_path)
-            full_path = os.path.join(doc_dir, file_path)
-        else:
-            full_path = file_path
+        # Security: Prevent path traversal attacks
+        # Normalize the path and check for directory traversal attempts
+        normalized_path = os.path.normpath(file_path)
+
+        # Reject absolute paths and parent directory references
+        if os.path.isabs(normalized_path):
+            errors.append(f"Entity '{entity_id}': absolute paths not allowed for security reasons")
+            return errors
+
+        if normalized_path.startswith('..') or '/..' in normalized_path or '\\..'.replace('\\', os.sep) in normalized_path:
+            errors.append(f"Entity '{entity_id}': parent directory references not allowed for security reasons")
+            return errors
+
+        # Make path relative to base document directory
+        doc_dir = os.path.dirname(os.path.abspath(base_path))
+        full_path = os.path.normpath(os.path.join(doc_dir, normalized_path))
+
+        # Ensure the resolved path is still within the base directory
+        if not full_path.startswith(os.path.normpath(doc_dir) + os.sep) and full_path != os.path.normpath(doc_dir):
+            errors.append(f"Entity '{entity_id}': path traversal detected - file must be in document directory")
+            return errors
 
         if not os.path.exists(full_path):
             errors.append(f"Entity '{entity_id}': file not found: {file_path}")
