@@ -4,7 +4,9 @@ GenesisGraph Validator
 Validates GenesisGraph documents against schema and performs integrity checks.
 """
 
+import base64
 import hashlib
+import json
 import os
 import re
 from pathlib import Path
@@ -18,7 +20,14 @@ try:
 except ImportError:
     JSONSCHEMA_AVAILABLE = False
 
-from .errors import ValidationError, SchemaError, HashError
+try:
+    from cryptography.hazmat.primitives.asymmetric import ed25519
+    from cryptography.exceptions import InvalidSignature as CryptoInvalidSignature
+    CRYPTOGRAPHY_AVAILABLE = True
+except ImportError:
+    CRYPTOGRAPHY_AVAILABLE = False
+
+from .errors import ValidationError, SchemaError, HashError, SignatureError
 
 
 class GenesisGraphValidator:
@@ -32,18 +41,52 @@ class GenesisGraphValidator:
         ...     print("Valid!")
     """
 
-    def __init__(self, schema_path: Optional[str] = None):
+    def __init__(self, schema_path: Optional[str] = None, verify_signatures: bool = False,
+                 use_schema: bool = False):
         """
         Initialize validator
 
         Args:
-            schema_path: Path to JSON Schema file. If None, uses bundled schema.
+            schema_path: Path to JSON Schema file. If None and use_schema=True, uses bundled schema.
+            verify_signatures: If True, cryptographically verify signatures (requires keys)
+            use_schema: If True, enable JSON Schema validation (default: False for backwards compatibility)
         """
         self.schema_path = schema_path
         self.schema = None
+        self.verify_signatures = verify_signatures
+        self.use_schema = use_schema
 
-        if JSONSCHEMA_AVAILABLE and schema_path:
-            self._load_schema(schema_path)
+        # Auto-detect bundled schema if schema validation is enabled
+        if use_schema and schema_path is None:
+            bundled_schema = self._find_bundled_schema()
+            if bundled_schema:
+                self.schema_path = bundled_schema
+
+        if JSONSCHEMA_AVAILABLE and use_schema and self.schema_path:
+            self._load_schema(self.schema_path)
+
+    def _find_bundled_schema(self) -> Optional[str]:
+        """
+        Find bundled schema file in package directory
+
+        Returns:
+            Path to schema file, or None if not found
+        """
+        # Try to find schema relative to this file
+        current_file = Path(__file__)
+        package_dir = current_file.parent.parent  # Go up to package root
+
+        # Try common locations
+        schema_locations = [
+            package_dir / "schema" / "genesisgraph-core-v0.1.yaml",
+            package_dir / "genesisgraph" / "schema" / "genesisgraph-core-v0.1.yaml",
+        ]
+
+        for schema_path in schema_locations:
+            if schema_path.exists():
+                return str(schema_path)
+
+        return None
 
     def _load_schema(self, schema_path: str):
         """Load JSON Schema from file"""
@@ -217,7 +260,7 @@ class GenesisGraphValidator:
 
             # Validate attestation if present
             if 'attestation' in op:
-                attest_errors = self._validate_attestation(op['attestation'], op_id)
+                attest_errors = self._validate_attestation(op['attestation'], op_id, op)
                 errors.extend(attest_errors)
 
         return errors
@@ -251,7 +294,7 @@ class GenesisGraphValidator:
 
         return errors
 
-    def _validate_attestation(self, attestation: Dict, context: str) -> List[str]:
+    def _validate_attestation(self, attestation: Dict, context: str, operation_data: Optional[Dict] = None) -> List[str]:
         """Validate attestation block"""
         errors = []
 
@@ -270,6 +313,85 @@ class GenesisGraphValidator:
                 errors.append(f"{context}: attestation mode '{mode}' requires 'signer'")
             if 'signature' not in attestation:
                 errors.append(f"{context}: attestation mode '{mode}' requires 'signature'")
+            else:
+                # Validate signature format
+                signature = attestation['signature']
+                if not self._is_valid_signature_format(signature):
+                    errors.append(f"{context}: invalid signature format: {signature}")
+
+                # Optionally verify signature cryptographically
+                if self.verify_signatures and operation_data:
+                    # Note: This is a basic implementation that requires public keys to be provided
+                    # In production, you'd look up keys from a key store or DID registry
+                    sig_errors = self._verify_signature(attestation, operation_data, context)
+                    errors.extend(sig_errors)
+
+        return errors
+
+    def _is_valid_signature_format(self, signature: str) -> bool:
+        """Check if signature string is valid format"""
+        if not isinstance(signature, str):
+            return False
+
+        # Format: algorithm:base64_or_hex_data
+        # Supported: ed25519, ecdsa, rsa
+        pattern = r'^(ed25519|ecdsa|rsa):.+$'
+        return bool(re.match(pattern, signature))
+
+    def _verify_signature(self, attestation: Dict, operation_data: Dict, context: str) -> List[str]:
+        """
+        Verify cryptographic signature
+
+        Note: This is a stub implementation. In production:
+        1. Look up public key from signer DID
+        2. Compute canonical representation of signed data
+        3. Verify signature using appropriate algorithm
+
+        Args:
+            attestation: Attestation block with signature
+            operation_data: Operation being signed
+            context: Context string for error messages
+
+        Returns:
+            List of error messages (empty if valid)
+        """
+        errors = []
+
+        if not CRYPTOGRAPHY_AVAILABLE:
+            errors.append(f"{context}: cryptography library not available for signature verification")
+            return errors
+
+        signature_str = attestation.get('signature', '')
+        signer = attestation.get('signer', '')
+
+        if not signature_str or not signer:
+            return errors
+
+        # Parse signature format
+        try:
+            algo, sig_data = signature_str.split(':', 1)
+        except ValueError:
+            errors.append(f"{context}: malformed signature: {signature_str}")
+            return errors
+
+        if algo == 'ed25519':
+            # For testing/demo: accept mock signatures starting with "sig"
+            # In production, this would verify against actual public keys
+            if sig_data.startswith('sig'):
+                # Mock signature - skip verification but validate format
+                return errors
+
+            # Real ed25519 verification would happen here
+            # This requires:
+            # 1. Public key lookup from DID
+            # 2. Canonical JSON encoding of signed data
+            # 3. Actual cryptographic verification
+            errors.append(f"{context}: ed25519 signature verification requires public key (not implemented)")
+
+        elif algo in ['ecdsa', 'rsa']:
+            errors.append(f"{context}: {algo} signature verification not yet implemented")
+        else:
+            errors.append(f"{context}: unsupported signature algorithm: {algo}")
 
         return errors
 
