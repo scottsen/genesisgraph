@@ -398,7 +398,7 @@ definitions:
 
 # Root schema
 type: object
-required: [spec_version, entities, tools, operations]
+required: [spec_version]
 properties:
   spec_version:
     type: string
@@ -423,17 +423,14 @@ properties:
     type: array
     items:
       $ref: "#/definitions/tool"
-    minItems: 1
   entities:
     type: array
     items:
       $ref: "#/definitions/entity"
-    minItems: 1
   operations:
     type: array
     items:
       $ref: "#/definitions/operation"
-    minItems: 1
   metadata:
     type: object
     description: "Document-level metadata"
