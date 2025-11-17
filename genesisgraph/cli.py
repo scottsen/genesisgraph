@@ -198,9 +198,11 @@ def main():
             print(f"\nEntities: {len(data.get('entities', []))}")
             print(f"Operations: {len(data.get('operations', []))}")
             print(f"Tools: {len(data.get('tools', []))}")
+            sys.exit(0)
 
         elif command == 'version':
             print(f"GenesisGraph v{__version__}")
+            sys.exit(0)
 
         else:
             print(f"Unknown command: {command}")
