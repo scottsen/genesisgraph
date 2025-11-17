@@ -15,9 +15,7 @@ References:
 
 import base64
 import json
-import re
-from typing import Optional, Dict, Any
-from urllib.parse import urlparse
+from typing import Any, Dict, Optional
 
 try:
     import requests
@@ -25,9 +23,13 @@ try:
 except ImportError:
     REQUESTS_AVAILABLE = False
 
-from cryptography.hazmat.primitives.asymmetric import ed25519
-
 from .errors import ValidationError
+
+# Constants for Ed25519 key handling
+ED25519_MULTICODEC_PREFIX = 0xED
+ED25519_MULTICODEC_SUFFIX = 0x01
+ED25519_KEY_LENGTH = 32
+MIN_DECODED_LENGTH = 2
 
 
 class DIDResolver:
@@ -80,7 +82,8 @@ class DIDResolver:
             raise ValidationError(f"Invalid DID format: {did}")
 
         parts = did.split(':', 2)
-        if len(parts) < 3:
+        min_did_parts = 3  # did:method:identifier
+        if len(parts) < min_did_parts:
             raise ValidationError(f"Invalid DID format: {did}")
 
         method = parts[1]
@@ -129,25 +132,29 @@ class DIDResolver:
         try:
             decoded = self._base58_decode(multibase_key[1:])  # Skip 'z'
         except Exception as e:
-            raise ValidationError(f"Failed to decode did:key: {e}")
+            raise ValidationError(f"Failed to decode did:key: {e}") from e
 
         # Check multicodec prefix for Ed25519 public key
         # Ed25519 public key multicodec: 0xed01 (variable length encoded)
         # In practice, it's encoded as 0xed 0x01 in the byte stream
-        if len(decoded) < 2:
+        if len(decoded) < MIN_DECODED_LENGTH:
             raise ValidationError(f"did:key too short: {len(decoded)} bytes")
 
         # Expected format: [0xed, 0x01, ...32 bytes of key...]
-        if decoded[0] != 0xed or decoded[1] != 0x01:
+        if decoded[0] != ED25519_MULTICODEC_PREFIX or decoded[1] != ED25519_MULTICODEC_SUFFIX:
             raise ValidationError(
                 f"Unsupported key type in did:key. Expected Ed25519 (0xed01), "
                 f"got 0x{decoded[0]:02x}{decoded[1]:02x}"
             )
 
         # Extract 32-byte Ed25519 public key
-        public_key = decoded[2:34]
-        if len(public_key) != 32:
-            raise ValidationError(f"Invalid Ed25519 key length: {len(public_key)} (expected 32)")
+        key_start = MIN_DECODED_LENGTH
+        key_end = key_start + ED25519_KEY_LENGTH
+        public_key = decoded[key_start:key_end]
+        if len(public_key) != ED25519_KEY_LENGTH:
+            raise ValidationError(
+                f"Invalid Ed25519 key length: {len(public_key)} (expected {ED25519_KEY_LENGTH})"
+            )
 
         return public_key
 
@@ -197,9 +204,9 @@ class DIDResolver:
             response.raise_for_status()
             did_document = response.json()
         except requests.RequestException as e:
-            raise ValidationError(f"Failed to fetch did:web document from {url}: {e}")
+            raise ValidationError(f"Failed to fetch did:web document from {url}: {e}") from e
         except json.JSONDecodeError as e:
-            raise ValidationError(f"Invalid JSON in did:web document from {url}: {e}")
+            raise ValidationError(f"Invalid JSON in did:web document from {url}: {e}") from e
 
         # Extract public key from DID document
         return self._extract_public_key_from_document(did_document, key_id or "#keys-1")
@@ -241,14 +248,13 @@ class DIDResolver:
                     key_b58 = method['publicKeyBase58']
                     return self._base58_decode(key_b58)
 
-                elif 'publicKeyMultibase' in method:
+                if 'publicKeyMultibase' in method:
                     multibase = method['publicKeyMultibase']
                     if multibase.startswith('z'):
                         return self._base58_decode(multibase[1:])
-                    else:
-                        raise ValidationError(f"Unsupported multibase encoding: {multibase[0]}")
+                    raise ValidationError(f"Unsupported multibase encoding: {multibase[0]}")
 
-                elif 'publicKeyJwk' in method:
+                if 'publicKeyJwk' in method:
                     jwk = method['publicKeyJwk']
                     if jwk.get('kty') != 'OKP' or jwk.get('crv') != 'Ed25519':
                         raise ValidationError(f"Unsupported JWK key type: {jwk}")
@@ -259,8 +265,7 @@ class DIDResolver:
                     x_b64 += '=' * (4 - len(x_b64) % 4)
                     return base64.urlsafe_b64decode(x_b64)
 
-                else:
-                    raise ValidationError(f"No supported public key format found in verification method")
+                raise ValidationError("No supported public key format found in verification method")
 
         raise ValidationError(f"Key {key_id} not found in DID document")
 

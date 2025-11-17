@@ -10,7 +10,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Any, Dict, List, Optional
 
 import yaml
 
@@ -21,8 +21,8 @@ except ImportError:
     JSONSCHEMA_AVAILABLE = False
 
 try:
-    from cryptography.hazmat.primitives.asymmetric import ed25519
     from cryptography.exceptions import InvalidSignature as CryptoInvalidSignature
+    from cryptography.hazmat.primitives.asymmetric import ed25519
     CRYPTOGRAPHY_AVAILABLE = True
 except ImportError:
     CRYPTOGRAPHY_AVAILABLE = False
@@ -33,7 +33,7 @@ try:
 except ImportError:
     DID_RESOLVER_AVAILABLE = False
 
-from .errors import ValidationError, SchemaError, HashError, SignatureError
+from .errors import SchemaError, ValidationError
 
 
 class GenesisGraphValidator:
@@ -102,10 +102,10 @@ class GenesisGraphValidator:
     def _load_schema(self, schema_path: str):
         """Load JSON Schema from file"""
         try:
-            with open(schema_path, 'r') as f:
+            with open(schema_path) as f:
                 self.schema = yaml.safe_load(f)
         except Exception as e:
-            raise SchemaError(f"Failed to load schema: {e}")
+            raise SchemaError(f"Failed to load schema: {e}") from e
 
     def validate_file(self, file_path: str) -> "ValidationResult":
         """
@@ -118,7 +118,7 @@ class GenesisGraphValidator:
             ValidationResult with validation details
         """
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 data = yaml.safe_load(f)
         except Exception as e:
             return ValidationResult(
@@ -392,7 +392,7 @@ class GenesisGraphValidator:
 
         if algo == 'ed25519':
             # For testing/demo: accept mock signatures
-            if sig_data.startswith('mock:') or sig_data.startswith('sig'):
+            if sig_data.startswith(('mock:', 'sig')):
                 # Mock signature - skip verification but validate format
                 return errors
 
