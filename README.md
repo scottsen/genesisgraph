@@ -364,9 +364,13 @@ This package represents the **v0.1** deliverables for selective disclosure:
 - [x] Three disclosure-level examples
 - [x] Basic verification scripts (Merkle, CT-style)
 
+**Completed (v0.1.1):**
+- [x] Full ed25519 signature verification
+- [x] DID resolution for identity verification (did:key)
+- [x] Security documentation (SECURITY.md)
+
 **Next steps (v0.2):**
-- [ ] Full ed25519 signature verification
-- [ ] DID resolution for identity verification
+- [ ] DID resolution for did:web
 - [ ] Real transparency log integration (Trillian, Rekor)
 - [ ] SD-JWT / BBS+ selective disclosure
 - [ ] ZK proof-of-policy templates
@@ -508,6 +512,10 @@ This is a **v0.1 public working draft**. Community feedback essential for succes
 - Example clarity (do Levels A/B/C demonstrate value?)
 - Verification scripts (what checks are missing?)
 - Profile requirements (what should gg-ai-basic-v1 mandate?)
+
+**Security:**
+- See [SECURITY.md](SECURITY.md) for vulnerability reporting and security considerations
+- Report security issues to: security@genesisgraph.dev
 
 **License:** Apache 2.0 - Free to use, modify, distribute.
 

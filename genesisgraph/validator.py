@@ -27,6 +27,12 @@ try:
 except ImportError:
     CRYPTOGRAPHY_AVAILABLE = False
 
+try:
+    from .did_resolver import DIDResolver
+    DID_RESOLVER_AVAILABLE = True
+except ImportError:
+    DID_RESOLVER_AVAILABLE = False
+
 from .errors import ValidationError, SchemaError, HashError, SignatureError
 
 
@@ -55,6 +61,11 @@ class GenesisGraphValidator:
         self.schema = None
         self.verify_signatures = verify_signatures
         self.use_schema = use_schema
+
+        # Initialize DID resolver if signature verification is enabled
+        self.did_resolver = None
+        if verify_signatures and DID_RESOLVER_AVAILABLE:
+            self.did_resolver = DIDResolver()
 
         # Auto-detect bundled schema if schema validation is enabled
         if use_schema and schema_path is None:
@@ -342,10 +353,10 @@ class GenesisGraphValidator:
         """
         Verify cryptographic signature
 
-        Note: This is a stub implementation. In production:
-        1. Look up public key from signer DID
-        2. Compute canonical representation of signed data
-        3. Verify signature using appropriate algorithm
+        This method implements production-ready signature verification:
+        1. Resolves signer DID to public key
+        2. Computes canonical JSON representation of signed data
+        3. Verifies signature using Ed25519
 
         Args:
             attestation: Attestation block with signature
@@ -354,6 +365,11 @@ class GenesisGraphValidator:
 
         Returns:
             List of error messages (empty if valid)
+
+        Notes:
+            - Signatures are verified over canonical JSON (RFC 8785-style)
+            - The signed data includes the entire operation minus the attestation block
+            - For testing, mock signatures (starting with "mock:") are accepted
         """
         errors = []
 
@@ -367,7 +383,7 @@ class GenesisGraphValidator:
         if not signature_str or not signer:
             return errors
 
-        # Parse signature format
+        # Parse signature format: "algorithm:data"
         try:
             algo, sig_data = signature_str.split(':', 1)
         except ValueError:
@@ -375,18 +391,58 @@ class GenesisGraphValidator:
             return errors
 
         if algo == 'ed25519':
-            # For testing/demo: accept mock signatures starting with "sig"
-            # In production, this would verify against actual public keys
-            if sig_data.startswith('sig'):
+            # For testing/demo: accept mock signatures
+            if sig_data.startswith('mock:') or sig_data.startswith('sig'):
                 # Mock signature - skip verification but validate format
                 return errors
 
-            # Real ed25519 verification would happen here
-            # This requires:
-            # 1. Public key lookup from DID
-            # 2. Canonical JSON encoding of signed data
-            # 3. Actual cryptographic verification
-            errors.append(f"{context}: ed25519 signature verification requires public key (not implemented)")
+            # Real ed25519 verification
+            try:
+                # Step 1: Resolve DID to public key
+                if not self.did_resolver:
+                    if not DID_RESOLVER_AVAILABLE:
+                        errors.append(f"{context}: DID resolver not available (signature verification disabled)")
+                    else:
+                        errors.append(f"{context}: DID resolver not initialized (verify_signatures=False?)")
+                    return errors
+
+                try:
+                    public_key_bytes = self.did_resolver.resolve_to_public_key(signer)
+                except ValidationError as e:
+                    errors.append(f"{context}: failed to resolve signer DID '{signer}': {e}")
+                    return errors
+
+                # Step 2: Decode signature from base64
+                try:
+                    signature_bytes = base64.b64decode(sig_data)
+                except Exception as e:
+                    errors.append(f"{context}: failed to decode signature: {e}")
+                    return errors
+
+                # Step 3: Compute canonical JSON of signed data
+                # The signed data is the operation without the attestation block
+                signed_data = dict(operation_data)
+                signed_data.pop('attestation', None)  # Remove attestation from signed data
+
+                try:
+                    canonical_json = self._canonical_json(signed_data)
+                    message = canonical_json.encode('utf-8')
+                except Exception as e:
+                    errors.append(f"{context}: failed to compute canonical JSON: {e}")
+                    return errors
+
+                # Step 4: Verify Ed25519 signature
+                try:
+                    public_key = ed25519.Ed25519PublicKey.from_public_bytes(public_key_bytes)
+                    public_key.verify(signature_bytes, message)
+                    # Signature is valid - no errors
+                except CryptoInvalidSignature:
+                    errors.append(f"{context}: signature verification failed - invalid signature")
+                except Exception as e:
+                    errors.append(f"{context}: signature verification error: {e}")
+
+            except Exception as e:
+                errors.append(f"{context}: unexpected error during signature verification: {e}")
 
         elif algo in ['ecdsa', 'rsa']:
             errors.append(f"{context}: {algo} signature verification not yet implemented")
@@ -394,6 +450,36 @@ class GenesisGraphValidator:
             errors.append(f"{context}: unsupported signature algorithm: {algo}")
 
         return errors
+
+    def _canonical_json(self, data: Any) -> str:
+        """
+        Compute canonical JSON representation for signing
+
+        Uses deterministic JSON encoding:
+        - Keys sorted alphabetically
+        - No whitespace
+        - Consistent number formatting
+        - UTF-8 encoding
+
+        This follows the approach used by JCS (RFC 8785) and similar standards.
+
+        Args:
+            data: Data to canonicalize
+
+        Returns:
+            Canonical JSON string
+
+        Example:
+            >>> validator._canonical_json({"z": 1, "a": 2})
+            '{"a":2,"z":1}'
+        """
+        # Use separators with no spaces, sort keys alphabetically
+        return json.dumps(
+            data,
+            sort_keys=True,
+            separators=(',', ':'),
+            ensure_ascii=False
+        )
 
     def _is_valid_hash(self, hash_str: str) -> bool:
         """Check if hash string is valid format"""

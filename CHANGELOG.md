@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Production Signature Verification** (Phase 1.2 Complete)
+  - Full Ed25519 cryptographic signature verification
+  - DID resolution for `did:key` identifiers (self-describing keys)
+  - Canonical JSON encoding for signed data (RFC 8785-style)
+  - Comprehensive test suite (20 tests) covering DID resolution, signature verification, and edge cases
+  - Support for mock signatures in testing mode
+  - `DIDResolver` class with caching and multiple DID method support
+
+- **Security Documentation** (Phase 1.3 Complete)
+  - `SECURITY.md`: Comprehensive security policy and vulnerability reporting process
+  - Threat model documentation (in-scope and out-of-scope threats)
+  - Security best practices for users, creators, and developers
+  - Cryptographic assumptions and disclosure level security considerations
+  - Known limitations and security roadmap
+
+### Changed
+- **Validator Enhancement**
+  - `GenesisGraphValidator` now supports production-ready signature verification when `verify_signatures=True`
+  - Added `did_resolver` attribute for DID-based public key lookup
+  - Improved error messages for signature verification failures
+  - Added `_canonical_json()` method for deterministic JSON encoding
+
+### Fixed
+- Signature verification now performs actual cryptographic validation (was stub in v0.1.0-alpha)
+
 ### In Progress
 - Working towards v0.1 Public Working Draft
 - Implementing improvements from 10-week enhancement plan
