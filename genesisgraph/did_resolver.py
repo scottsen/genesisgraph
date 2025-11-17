@@ -15,13 +15,20 @@ References:
 
 import base64
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
+from time import time
 
 try:
     import requests
     REQUESTS_AVAILABLE = True
 except ImportError:
     REQUESTS_AVAILABLE = False
+
+try:
+    import ipaddress
+    IPADDRESS_AVAILABLE = True
+except ImportError:
+    IPADDRESS_AVAILABLE = False
 
 from .errors import ValidationError
 
@@ -30,6 +37,31 @@ ED25519_MULTICODEC_PREFIX = 0xED
 ED25519_MULTICODEC_SUFFIX = 0x01
 ED25519_KEY_LENGTH = 32
 MIN_DECODED_LENGTH = 2
+
+# Security: SSRF Protection - Blocked hosts and networks
+BLOCKED_HOSTS = {
+    'localhost', '127.0.0.1', '0.0.0.0',
+    '169.254.169.254',  # AWS metadata service
+    '::1',  # IPv6 localhost
+    '::ffff:127.0.0.1',  # IPv4-mapped IPv6 localhost
+}
+
+# Private network ranges to block
+BLOCKED_NETWORKS = [
+    '10.0.0.0/8',      # Private network (Class A)
+    '172.16.0.0/12',   # Private network (Class B)
+    '192.168.0.0/16',  # Private network (Class C)
+    '169.254.0.0/16',  # Link-local addresses
+    '127.0.0.0/8',     # Loopback
+    'fc00::/7',        # IPv6 Unique Local Addresses
+    'fe80::/10',       # IPv6 Link-Local addresses
+    '::1/128',         # IPv6 loopback
+]
+
+# Security: Input size limits
+MAX_BASE58_LENGTH = 128  # Maximum base58 string length to prevent DoS
+MAX_DID_LENGTH = 512     # Maximum DID length
+MAX_RESPONSE_SIZE = 1_000_000  # 1MB max for DID documents
 
 
 class DIDResolver:
@@ -42,17 +74,20 @@ class DIDResolver:
         >>> # Use public_key for signature verification
     """
 
-    def __init__(self, timeout: int = 10, cache_ttl: int = 300):
+    def __init__(self, timeout: int = 10, cache_ttl: int = 300, rate_limit: int = 10):
         """
         Initialize DID resolver
 
         Args:
             timeout: HTTP request timeout in seconds (for did:web)
             cache_ttl: Cache time-to-live in seconds
+            rate_limit: Maximum requests per minute per domain (for did:web)
         """
         self.timeout = timeout
         self.cache_ttl = cache_ttl
-        self._cache: Dict[str, Any] = {}
+        self._cache: Dict[str, Tuple[bytes, float]] = {}  # (value, timestamp)
+        self._rate_limits: Dict[str, List[float]] = {}  # domain -> list of request timestamps
+        self._rate_limit_max = rate_limit
 
     def resolve_to_public_key(self, did: str, key_id: Optional[str] = None) -> bytes:
         """
@@ -72,10 +107,20 @@ class DIDResolver:
             >>> resolver = DIDResolver()
             >>> pub_key = resolver.resolve_to_public_key("did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK")
         """
-        # Check cache
+        # Security: Validate DID length to prevent DoS
+        if len(did) > MAX_DID_LENGTH:
+            raise ValidationError(f"DID too long: {len(did)} (max {MAX_DID_LENGTH})")
+
+        # Check cache with TTL
         cache_key = f"{did}#{key_id}" if key_id else did
         if cache_key in self._cache:
-            return self._cache[cache_key]
+            cached_value, cached_time = self._cache[cache_key]
+            # Check if cache entry is still valid
+            if time() - cached_time < self.cache_ttl:
+                return cached_value
+            else:
+                # Expired - remove from cache
+                del self._cache[cache_key]
 
         # Extract DID method
         if not did.startswith('did:'):
@@ -96,8 +141,8 @@ class DIDResolver:
         else:
             raise ValidationError(f"Unsupported DID method: {method}")
 
-        # Cache result
-        self._cache[cache_key] = public_key
+        # Cache result with timestamp
+        self._cache[cache_key] = (public_key, time())
 
         return public_key
 
@@ -158,6 +203,66 @@ class DIDResolver:
 
         return public_key
 
+    def _is_blocked_host(self, domain: str) -> bool:
+        """
+        Check if a domain/host is blocked for security reasons
+
+        Args:
+            domain: Domain name or IP address to check
+
+        Returns:
+            True if blocked, False if allowed
+        """
+        # Check against blocked hostnames
+        if domain.lower() in BLOCKED_HOSTS:
+            return True
+
+        # Check if it's an IP address in a blocked network
+        if IPADDRESS_AVAILABLE:
+            try:
+                ip = ipaddress.ip_address(domain)
+                for network_str in BLOCKED_NETWORKS:
+                    network = ipaddress.ip_network(network_str)
+                    if ip in network:
+                        return True
+            except ValueError:
+                # Not an IP address, domain name is OK (will be resolved by DNS)
+                pass
+
+        return False
+
+    def _check_rate_limit(self, domain: str) -> None:
+        """
+        Enforce rate limiting per domain to prevent abuse
+
+        Args:
+            domain: Domain to check rate limit for
+
+        Raises:
+            ValidationError: If rate limit is exceeded
+        """
+        now = time()
+        minute_ago = now - 60
+
+        # Initialize rate limit tracking for this domain
+        if domain not in self._rate_limits:
+            self._rate_limits[domain] = []
+
+        # Clean old requests (older than 1 minute)
+        self._rate_limits[domain] = [
+            t for t in self._rate_limits[domain] if t > minute_ago
+        ]
+
+        # Check if rate limit exceeded
+        if len(self._rate_limits[domain]) >= self._rate_limit_max:
+            raise ValidationError(
+                f"Rate limit exceeded for domain '{domain}': "
+                f"{self._rate_limit_max} requests per minute maximum"
+            )
+
+        # Record this request
+        self._rate_limits[domain].append(now)
+
     def _resolve_did_web(self, did: str, key_id: Optional[str] = None) -> bytes:
         """
         Resolve did:web by fetching DID document via HTTPS
@@ -177,6 +282,13 @@ class DIDResolver:
 
         Raises:
             ValidationError: If resolution fails or key extraction fails
+
+        Security:
+            - Blocks private/internal IP addresses (SSRF protection)
+            - Enforces TLS certificate validation
+            - Blocks redirects
+            - Validates Content-Type and response size
+            - Implements rate limiting per domain
         """
         if not REQUESTS_AVAILABLE:
             raise ValidationError("did:web resolution requires 'requests' library")
@@ -190,7 +302,17 @@ class DIDResolver:
         domain = parts[0]
         path_parts = parts[1:] if len(parts) > 1 else []
 
-        # Construct URL
+        # Security: Block dangerous hosts (SSRF protection)
+        if self._is_blocked_host(domain):
+            raise ValidationError(
+                f"Blocked host in did:web for security reasons: {domain}. "
+                f"Private/internal hosts are not allowed."
+            )
+
+        # Security: Enforce rate limiting
+        self._check_rate_limit(domain)
+
+        # Construct URL (always HTTPS for security)
         # If no path: https://example.com/.well-known/did.json
         # If path: https://example.com/path/components/did.json
         if path_parts:
@@ -198,11 +320,37 @@ class DIDResolver:
         else:
             url = f"https://{domain}/.well-known/did.json"
 
-        # Fetch DID document
+        # Fetch DID document with security controls
         try:
-            response = requests.get(url, timeout=self.timeout)
+            response = requests.get(
+                url,
+                timeout=self.timeout,
+                verify=True,  # Enforce TLS certificate validation
+                allow_redirects=False,  # Prevent redirect-based SSRF
+                headers={
+                    'Accept': 'application/json',
+                    'User-Agent': 'GenesisGraph-DID-Resolver/0.1.0'
+                }
+            )
             response.raise_for_status()
+
+            # Security: Validate Content-Type
+            content_type = response.headers.get('Content-Type', '')
+            if 'application/json' not in content_type and 'application/did+json' not in content_type:
+                raise ValidationError(
+                    f"Invalid content type from {url}: {content_type}. "
+                    f"Expected application/json or application/did+json"
+                )
+
+            # Security: Validate response size
+            if len(response.content) > MAX_RESPONSE_SIZE:
+                raise ValidationError(
+                    f"Response too large from {url}: {len(response.content)} bytes "
+                    f"(max {MAX_RESPONSE_SIZE})"
+                )
+
             did_document = response.json()
+
         except requests.RequestException as e:
             raise ValidationError(f"Failed to fetch did:web document from {url}: {e}") from e
         except json.JSONDecodeError as e:
@@ -272,14 +420,25 @@ class DIDResolver:
     @staticmethod
     def _base58_decode(s: str) -> bytes:
         """
-        Decode base58btc string to bytes
+        Decode base58btc string to bytes with size limits for security
 
         Args:
             s: Base58btc encoded string
 
         Returns:
             Decoded bytes
+
+        Raises:
+            ValueError: If input is too long or decoded value is too large
+
+        Security:
+            - Limits input size to prevent DoS attacks
+            - Validates decoded size to prevent integer overflow
         """
+        # Security: Limit input size to prevent DoS
+        if len(s) > MAX_BASE58_LENGTH:
+            raise ValueError(f"Base58 string too long: {len(s)} (max {MAX_BASE58_LENGTH})")
+
         # Bitcoin-style base58 alphabet
         ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 
@@ -289,6 +448,12 @@ class DIDResolver:
             if char not in ALPHABET:
                 raise ValueError(f"Invalid base58 character: {char}")
             num = num * 58 + ALPHABET.index(char)
+
+        # Security: Sanity check decoded size (prevent integer overflow)
+        # Max reasonable size for a key is ~1024 bits = 128 bytes
+        max_bit_length = 1024
+        if num.bit_length() > max_bit_length:
+            raise ValueError(f"Decoded base58 value too large: {num.bit_length()} bits (max {max_bit_length})")
 
         # Convert integer to bytes
         # Count leading zeros
