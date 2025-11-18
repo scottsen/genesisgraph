@@ -40,7 +40,7 @@ MIN_DECODED_LENGTH = 2
 
 # Security: SSRF Protection - Blocked hosts and networks
 BLOCKED_HOSTS = {
-    'localhost', '127.0.0.1', '0.0.0.0',
+    'localhost', '127.0.0.1', '0.0.0.0',  # nosec B104 - This is a blocklist for SSRF protection, not binding
     '169.254.169.254',  # AWS metadata service
     '::1',  # IPv6 localhost
     '::ffff:127.0.0.1',  # IPv4-mapped IPv6 localhost

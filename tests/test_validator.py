@@ -579,15 +579,20 @@ class TestHashVerification:
         test_content = b'test content for hash verification'
         expected_hash = hashlib.sha256(test_content).hexdigest()
 
-        with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.txt') as f:
-            f.write(test_content)
-            test_file = f.name
-
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml') as f:
-            f.write('dummy')
-            yaml_file = f.name
+        # Create temp directory to hold both files
+        temp_dir = tempfile.mkdtemp()
+        test_file = os.path.join(temp_dir, 'test_file.txt')
+        yaml_file = os.path.join(temp_dir, 'test.yaml')
 
         try:
+            # Write test file
+            with open(test_file, 'wb') as f:
+                f.write(test_content)
+
+            # Write yaml file
+            with open(yaml_file, 'w') as f:
+                f.write('dummy')
+
             data = {
                 'spec_version': '0.1.0',
                 'entities': [
@@ -595,7 +600,7 @@ class TestHashVerification:
                         'id': 'test',
                         'type': 'Dataset',
                         'version': '1.0',
-                        'file': test_file,
+                        'file': 'test_file.txt',  # Relative path
                         'hash': f'sha256:{expected_hash}'
                     }
                 ]
@@ -604,10 +609,10 @@ class TestHashVerification:
             validator = GenesisGraphValidator()
             result = validator.validate(data, file_path=yaml_file)
 
-            assert result.is_valid
+            assert result.is_valid, f"Validation failed: {result.errors}"
         finally:
-            os.unlink(test_file)
-            os.unlink(yaml_file)
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
     def test_file_hash_verification_incorrect_hash(self):
         """Test hash verification with incorrect hash"""
@@ -616,15 +621,21 @@ class TestHashVerification:
 
         # Create a test file
         test_content = b'test content'
-        with tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix='.txt') as f:
-            f.write(test_content)
-            test_file = f.name
 
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.yaml') as f:
-            f.write('dummy')
-            yaml_file = f.name
+        # Create temp directory to hold both files
+        temp_dir = tempfile.mkdtemp()
+        test_file = os.path.join(temp_dir, 'test_file.txt')
+        yaml_file = os.path.join(temp_dir, 'test.yaml')
 
         try:
+            # Write test file
+            with open(test_file, 'wb') as f:
+                f.write(test_content)
+
+            # Write yaml file
+            with open(yaml_file, 'w') as f:
+                f.write('dummy')
+
             data = {
                 'spec_version': '0.1.0',
                 'entities': [
@@ -632,7 +643,7 @@ class TestHashVerification:
                         'id': 'test',
                         'type': 'Dataset',
                         'version': '1.0',
-                        'file': test_file,
+                        'file': 'test_file.txt',  # Relative path
                         'hash': 'sha256:' + '0' * 64  # Wrong hash
                     }
                 ]
@@ -644,8 +655,8 @@ class TestHashVerification:
             assert not result.is_valid
             assert any('hash mismatch' in error.lower() for error in result.errors)
         finally:
-            os.unlink(test_file)
-            os.unlink(yaml_file)
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 class TestExampleFiles:
