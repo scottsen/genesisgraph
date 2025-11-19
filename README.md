@@ -35,6 +35,8 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 4. **[spec/MAIN_SPEC.md](spec/MAIN_SPEC.md)** - Complete specification (886 lines)
 5. **[STRATEGIC_CONTEXT.md](STRATEGIC_CONTEXT.md)** - Why this matters, adoption strategy, 5-year vision
 
+**Enterprise users:** See **[docs/DID_WEB_GUIDE.md](docs/DID_WEB_GUIDE.md)** for did:web support - use your organization's domain for identity management.
+
 **Want to integrate?** See `USE_CASES.md` §Integration Patterns for wrapper/native/post-hoc approaches.
 
 ---
@@ -51,13 +53,21 @@ genesisgraph/
 │   └── MAIN_SPEC.md              # Updated specification with §9.2 selective disclosure
 ├── schema/
 │   └── genesisgraph-core-v0.1.yaml  # Core schema with selective disclosure support
+├── docs/
+│   └── DID_WEB_GUIDE.md          # Complete guide for did:web usage
 ├── examples/
 │   ├── level-a-full-disclosure.gg.yaml     # Level A: Full transparency
 │   ├── level-b-partial-envelope.gg.yaml    # Level B: Policy claims only
-│   └── level-c-sealed-subgraph.gg.yaml     # Level C: Sealed subgraph with commitments
-└── scripts/
-    ├── verify_sealed_subgraph.py           # Merkle inclusion proof verifier
-    └── verify_transparency_anchoring.py    # Transparency log anchor verifier
+│   ├── level-c-sealed-subgraph.gg.yaml     # Level C: Sealed subgraph with commitments
+│   ├── workflow-with-did-web.gg.yaml       # Enterprise workflow using did:web
+│   ├── did-web-example.json                # Sample DID document
+│   └── did-web-organization.json           # Organization DID document with multiple keys
+├── scripts/
+│   ├── verify_sealed_subgraph.py           # Merkle inclusion proof verifier
+│   └── verify_transparency_anchoring.py    # Transparency log anchor verifier
+└── genesisgraph/
+    ├── did_resolver.py             # DID resolution (did:key, did:web)
+    └── validator.py                # Signature verification with DID support
 ```
 
 ## What's New: Selective Disclosure Patterns
@@ -366,15 +376,17 @@ This package represents the **v0.1** deliverables for selective disclosure:
 
 **Completed (v0.1.1):**
 - [x] Full ed25519 signature verification
-- [x] DID resolution for identity verification (did:key)
+- [x] DID resolution for identity verification (did:key, did:web)
 - [x] Security documentation (SECURITY.md)
+- [x] Comprehensive did:web support with SSRF protection, rate limiting, and TLS validation
+- [x] Integration tests and examples for did:web
 
 **Next steps (v0.2):**
-- [ ] DID resolution for did:web
 - [ ] Real transparency log integration (Trillian, Rekor)
 - [ ] SD-JWT / BBS+ selective disclosure
 - [ ] ZK proof-of-policy templates
 - [ ] Profile-specific validators (gg-ai-basic-v1, gg-cam-v1)
+- [ ] Additional DID methods (did:ion, did:ethr)
 
 ## Comparison Matrix: Verification Strengths
 
