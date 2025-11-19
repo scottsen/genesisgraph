@@ -30,12 +30,21 @@ if CLICK_AVAILABLE:
     @click.argument('file_path', type=click.Path(exists=True))
     @click.option('--schema', '-s', type=click.Path(exists=True),
                   help='Path to JSON Schema file')
+    @click.option('--verify-signatures', is_flag=True,
+                  help='Verify cryptographic signatures (Ed25519)')
+    @click.option('--verify-transparency', is_flag=True,
+                  help='Verify transparency log inclusion proofs (RFC 6962)')
     @click.option('--verbose', '-v', is_flag=True,
                   help='Verbose output')
-    def validate(file_path: str, schema: Optional[str], verbose: bool):
+    def validate(file_path: str, schema: Optional[str], verify_signatures: bool,
+                 verify_transparency: bool, verbose: bool):
         """Validate a GenesisGraph document"""
 
-        validator = GenesisGraphValidator(schema_path=schema)
+        validator = GenesisGraphValidator(
+            schema_path=schema,
+            verify_signatures=verify_signatures,
+            verify_transparency=verify_transparency
+        )
         result = validator.validate_file(file_path)
 
         if verbose or not result.is_valid:
