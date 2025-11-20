@@ -10,7 +10,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Industry-Specific Profile Validators** (Phase 5 Validation)
+- **Python and JavaScript SDK Libraries** (closed #14)
+  - Python builder API with fluent interface for programmatic document creation
+  - Comprehensive type hints and validation in Python SDK
+  - JavaScript/TypeScript SDK with full type definitions
+  - Entity, Operation, Tool, and Attestation builders with method chaining
+  - YAML and JSON export/import capabilities
+  - 48 comprehensive tests with 93% code coverage for Python builder
+  - Full documentation in `SDK-DEVELOPMENT-GUIDE.md` (1,368 lines)
+  - Quick reference guide in `SDK-QUICK-REFERENCE.md` (477 lines)
+  - Example code in `examples/python_sdk_quickstart.py` and `sdks/javascript/examples/quickstart.ts`
+  - Enables programmatic integration for CI/CD pipelines and automation tools
+
+- **SD-JWT and BBS+ Selective Disclosure** (closed #10)
+  - SD-JWT (Selective Disclosure JWT) implementation following IETF draft specification
+  - BBS+ signature support for privacy-preserving credential verification
+  - Predicate proofs for range validation without revealing exact values
+  - Zero-knowledge range proofs with configurable boundaries
+  - Privacy-preserving validation with selective claim disclosure
+  - Integration with GenesisGraph attestation format
+  - 1,385 new tests covering SD-JWT, BBS+, and predicate operations
+  - Full documentation in `docs/SELECTIVE_DISCLOSURE.md` (469 lines)
+  - Example attestations demonstrating SD-JWT, BBS+, and predicate usage
+  - Optional `credentials` extra dependencies for advanced cryptographic features
+
+- **Industry-Specific Profile Validators** (closed #12)
   - `gg-ai-basic-v1`: AI/ML pipeline validation with FDA 21 CFR Part 11 support
   - `gg-cam-v1`: Computer-aided manufacturing validation with ISO-9001 compliance
   - Profile registry with automatic profile detection based on operation types

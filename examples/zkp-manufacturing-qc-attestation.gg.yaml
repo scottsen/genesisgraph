@@ -1,0 +1,208 @@
+# GenesisGraph ZKP Template Example: Manufacturing Quality Control
+#
+# This example demonstrates using zero-knowledge proof templates for
+# aerospace manufacturing compliance (AS9100D, ISO 9001:2015).
+#
+# Use case: Aerospace supplier proves part meets specifications without
+# revealing proprietary manufacturing parameters or exact measurements.
+#
+# Template: manufacturing_qc
+# Policy: Prove tolerances met, hardness spec, certified operator
+
+spec_version: 0.1.0
+profile: gg-cam-v1
+
+tools:
+  - id: cnc_mill
+    type: CNCMachine
+    vendor: Haas
+    model: VF-4SS
+    serial: HF123456
+    identity:
+      did: did:web:manufacturing.aerospace-supplier.com:machines:vf4ss-001
+
+  - id: hardness_tester
+    type: MeasurementDevice
+    vendor: Wilson
+    model: Rockwell-2000
+    serial: WR789012
+    identity:
+      did: did:web:manufacturing.aerospace-supplier.com:qc:rockwell-001
+
+entities:
+  - id: cad_model
+    type: CADModel
+    version: "5.0"
+    file: bracket.step
+    hash: sha256:cad_model_hash
+
+  - id: finished_part
+    type: PhysicalPart
+    version: "1.0"
+    serial_number: PT-2025-001234
+    hash: sha256:final_inspection_report_hash
+
+operations:
+  - id: cnc_machining_zkp
+    type: machining
+    inputs: [cad_model@5.0]
+    outputs: [finished_part@1.0]
+    tool: cnc_mill@HF123456
+
+    # Manufacturing parameters HIDDEN via ZKP
+    parameters:
+      _redacted: true
+
+    # ZKP template attestation
+    attestation:
+      mode: zkp-template
+      timestamp: "2025-01-20T14:15:00Z"
+
+      # Zero-knowledge proof template
+      zkp_template:
+        template: manufacturing_qc
+        policy_id: manufacturing-qc-as9100d
+        version: "1.0"
+
+        # ZKP proofs for quality control
+        proofs:
+          - claim_name: tolerance_mm
+            proof_type: range
+            min_value: -0.01
+            max_value: 0.01
+            include_bounds: true
+            satisfied: true
+            commitment: 5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4
+            nonce: qc_abc123
+            timestamp: "2025-01-20T14:15:00Z"
+            metadata:
+              template: "Manufacturing QC Compliance"
+              rationale: "ISO 2768 tolerance class"
+              standard: "ISO 2768-mK"
+
+          - claim_name: hardness_hrc
+            proof_type: threshold
+            comparison: gte
+            threshold: 55
+            satisfied: true
+            commitment: 3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2
+            nonce: qc_def456
+            timestamp: "2025-01-20T14:15:00Z"
+            metadata:
+              template: "Manufacturing QC Compliance"
+              rationale: "Material specification requirement"
+              standard: "ASTM E18-20"
+              test_method: "Rockwell C scale"
+
+          - claim_name: operator_certified
+            proof_type: equality
+            expected_value: true
+            satisfied: true
+            commitment: 1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e2d1c0
+            nonce: qc_ghi789
+            timestamp: "2025-01-20T14:15:00Z"
+            metadata:
+              template: "Manufacturing QC Compliance"
+              rationale: "AS9100D certified operator requirement"
+              standard: "AS9100D Section 7.2"
+
+        # Composite proof (all QC requirements met)
+        composite_proof:
+          logic: and
+          satisfied: true
+          proof_count: 3
+          commitment: composite_qc_proof_manufacturing
+
+      # Multi-signature (engineer + QA manager)
+      multisig:
+        threshold: 2
+        signers:
+          - did: did:web:aerospace-supplier.com:personnel:engineer-jane
+            signature: ed25519:engineer_signature_zkp
+          - did: did:web:aerospace-supplier.com:personnel:qa-manager-bob
+            signature: ed25519:qa_manager_signature_zkp
+        signed_at: "2025-01-20T14:15:00Z"
+
+      # Transparency log anchoring
+      transparency:
+        - log_id: did:log:aerospace-compliance-log
+          entry_id: "0x7a9b8c"
+          tree_size: 152873
+          inclusion_proof: base64_encoded_inclusion_proof_here
+
+metadata:
+  description: "Aerospace part manufacturing with ZKP QC compliance"
+  part_number: "AS-BRK-7750-Rev5"
+  customer: "Aerospace Customer (Confidential)"
+  standard_compliance:
+    - AS9100D
+    - ISO 9001:2015
+    - NADCAP (Heat Treat)
+
+  use_case: |
+    Manufacturing Quality Control with Zero-Knowledge Proofs
+
+    SCENARIO:
+    - Aerospace supplier makes critical safety part
+    - Customer requires AS9100D compliance proof
+    - Supplier has proprietary manufacturing process
+    - Must prove compliance without revealing process IP
+
+    WHAT IS PROVEN:
+    ✓ Dimensional tolerance within ±0.01mm (ISO 2768)
+    ✓ Material hardness ≥ 55 HRC (spec requirement)
+    ✓ Operator is AS9100D certified
+    ✓ All QC checks passed (composite proof)
+
+    WHAT IS HIDDEN:
+    ✗ Exact tolerance measurement (manufacturing precision IP)
+    ✗ Exact hardness value (heat treatment process secret)
+    ✗ Toolpath strategies (CAM algorithm IP)
+    ✗ Feed rates and speeds (process optimization)
+    ✗ Surface finish techniques (competitive advantage)
+
+    VERIFICATION WORKFLOW:
+    1. Customer receives ZKP attestation
+    2. Customer verifies all proofs satisfied
+    3. Customer checks cryptographic signatures
+    4. Customer validates transparency log anchoring
+    5. For dispute: supplier can disclose values to independent auditor
+
+    BUSINESS VALUE:
+    - Prove AS9100D compliance to customer
+    - Protect proprietary manufacturing processes
+    - Enable multi-party verification (customer, FAA, NADCAP)
+    - Cryptographic audit trail for liability protection
+
+  privacy_preservation:
+    manufacturing_ip_protected:
+      - "Exact dimensional measurements (precision capabilities)"
+      - "Heat treatment parameters (metallurgy IP)"
+      - "Toolpath optimization (CAM algorithms)"
+      - "Feed/speed strategies (cycle time optimization)"
+      - "Surface finishing techniques (quality secrets)"
+
+    compliance_proven:
+      - "Part meets dimensional tolerances"
+      - "Material hardness meets specification"
+      - "Qualified operator performed work"
+      - "Quality system requirements met"
+
+  audit_trail:
+    transparency_log: "Aerospace compliance log"
+    signatures: "Engineer + QA Manager (2-of-2 multisig)"
+    certificate_retention: "10 years (AS9100D requirement)"
+
+  comparison:
+    traditional_certs: |
+      Traditional Certificate of Conformance (C of C):
+      - States "meets spec" but no cryptographic proof
+      - Full measurements often required (reveals IP)
+      - Can be forged or altered
+      - No immutable audit trail
+
+      ZKP Template Approach:
+      - Cryptographic proof of compliance
+      - Measurements hidden (IP protected)
+      - Tamper-evident commitments
+      - Immutable transparency log
