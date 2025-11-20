@@ -1,0 +1,176 @@
+# GenesisGraph ZKP Template Example: AI Safety Compliance
+#
+# This example demonstrates using zero-knowledge proof templates to prove
+# AI model safety compliance without revealing proprietary parameters.
+#
+# Use case: AI provider proves safety constraints to regulator without
+# revealing exact temperature, prompts, or configuration (trade secrets).
+#
+# Template: ai_safety
+# Policy: Prove temperature ≤ 1.0, max_tokens ≤ 100000, approved model
+
+spec_version: 0.1.0
+profile: gg-ai-basic-v1
+
+tools:
+  - id: claude
+    type: AIModel
+    vendor: Anthropic
+    version: claude-sonnet-4.5-20250929
+    identity:
+      did: did:web:api.anthropic.com
+
+entities:
+  - id: user_query
+    type: Dataset
+    version: "1.0"
+    file: query.txt
+    hash: sha256:query_hash_abc123
+
+  - id: ai_response
+    type: Dataset
+    version: "1.0"
+    file: response.json
+    hash: sha256:response_hash_def456
+
+operations:
+  - id: ai_inference_zkp
+    type: inference
+    inputs: [user_query@1.0]
+    outputs: [ai_response@1.0]
+    tool: claude@claude-sonnet-4.5-20250929
+
+    # Parameters are HIDDEN via ZKP template
+    parameters:
+      _redacted: true
+
+    # ZKP template attestation mode
+    attestation:
+      mode: zkp-template
+      timestamp: "2025-01-20T15:30:00Z"
+
+      # Zero-knowledge proof template
+      zkp_template:
+        # Template type from registry
+        template: ai_safety
+        policy_id: ai-safety-v1
+        version: "1.0"
+
+        # ZKP proofs (actual values NOT disclosed)
+        proofs:
+          - claim_name: temperature
+            proof_type: threshold
+            comparison: lte
+            threshold: 1.0
+            satisfied: true
+            commitment: 7f3a8b2c1d4e5f6a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1
+            nonce: abc123def456
+            timestamp: "2025-01-20T15:30:00Z"
+            metadata:
+              template: "AI Safety Compliance"
+              rationale: "Prevent excessive randomness"
+
+          - claim_name: max_tokens
+            proof_type: threshold
+            comparison: lte
+            threshold: 100000
+            satisfied: true
+            commitment: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2
+            nonce: def456ghi789
+            timestamp: "2025-01-20T15:30:00Z"
+            metadata:
+              template: "AI Safety Compliance"
+              rationale: "Prevent resource abuse"
+
+          - claim_name: model
+            proof_type: set_membership
+            allowed_set:
+              - gpt-4
+              - gpt-4-turbo
+              - claude-3-opus
+              - claude-3-sonnet
+              - claude-sonnet-4.5
+              - gemini-pro
+            set_size: 6
+            satisfied: true
+            commitment: 9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8
+            nonce: ghi789jkl012
+            timestamp: "2025-01-20T15:30:00Z"
+            metadata:
+              template: "AI Safety Compliance"
+              rationale: "Use only approved models"
+
+        # Composite proof (all individual proofs combined with AND)
+        composite_proof:
+          logic: and
+          satisfied: true
+          proof_count: 3
+          commitment: composite_abc123def456ghi789
+
+      # Optional: Signature from AI provider
+      signature:
+        algorithm: EdDSA
+        signer: did:web:api.anthropic.com
+        signature: ed25519:zkp_template_signature_here
+        signed_at: "2025-01-20T15:30:00Z"
+
+metadata:
+  description: "AI inference with ZKP safety compliance"
+  use_case: |
+    Zero-Knowledge Proof Template Demonstration
+
+    WHAT IS PROVEN:
+    ✓ Temperature ≤ 1.0 (safety constraint)
+    ✓ Max tokens ≤ 100,000 (resource constraint)
+    ✓ Model in approved list (approved models only)
+    ✓ All constraints satisfied (composite AND proof)
+
+    WHAT IS HIDDEN:
+    ✗ Exact temperature value (proprietary tuning)
+    ✗ Exact token limit (configuration secret)
+    ✗ Which specific model (prevents fingerprinting)
+    ✗ System prompts (IP protection)
+    ✗ Fine-tuning details (trade secrets)
+
+    VERIFICATION:
+    - Regulator sees proofs are satisfied
+    - Regulator can verify cryptographic commitments
+    - Regulator CANNOT see actual values
+    - For audit: provider can disclose values to verify commitments
+
+    BENEFITS:
+    - Prove safety compliance without revealing IP
+    - Cryptographic proof (not just claims)
+    - Selective disclosure (choose what to reveal)
+    - Post-hoc audit trail (commitments are binding)
+
+  privacy_preservation:
+    ip_protected:
+      - "Exact temperature value (competitive advantage)"
+      - "Token allocation strategy (resource optimization)"
+      - "Model selection logic (routing algorithm)"
+      - "System prompts (prompt engineering IP)"
+
+    compliance_proven:
+      - "Temperature within safety bounds"
+      - "Resource limits enforced"
+      - "Only approved models used"
+
+  comparison_with_other_methods:
+    predicate_disclosure: |
+      Similar to predicates, but ZKP templates provide:
+      - Pre-packaged templates for common scenarios
+      - Composite proofs (multiple constraints)
+      - Policy-level compliance (not just individual claims)
+
+    bbs_plus_signatures: |
+      ZKP templates complement BBS+:
+      - BBS+: Unlinkable credential presentations
+      - ZKP templates: Policy compliance proofs
+      - Can combine both for maximum privacy
+
+    full_disclosure: |
+      vs. Level A (full disclosure):
+      - ZKP: Proves compliance without revealing values
+      - Full: All parameters visible
+      - Use ZKP when IP protection critical
