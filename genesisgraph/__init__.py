@@ -14,13 +14,28 @@ from .errors import (
     HashError,
     SignatureError,
 )
+from .builder import (
+    GenesisGraph,
+    Entity,
+    Operation,
+    Tool,
+    Attestation,
+)
 
 __all__ = [
+    # Validator
     "GenesisGraphValidator",
     "validate",
+    # Errors
     "GenesisGraphError",
     "ValidationError",
     "SchemaError",
     "HashError",
     "SignatureError",
+    # Builder API
+    "GenesisGraph",
+    "Entity",
+    "Operation",
+    "Tool",
+    "Attestation",
 ]
