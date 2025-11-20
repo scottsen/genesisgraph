@@ -84,7 +84,7 @@ class TestDIDResolver:
         resolver = DIDResolver()
 
         with pytest.raises(ValidationError, match="Unsupported DID method"):
-            resolver.resolve_to_public_key("did:ion:EiDahaOGH-liLLdDtTxEAdc8i-cfCz-WUcQdRJheMVNn3A")
+            resolver.resolve_to_public_key("did:btcr:xxcl-lzpq-q83a-0d5")
 
     def test_convenience_function(self):
         """Test resolve_did_to_public_key convenience function"""
