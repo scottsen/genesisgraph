@@ -10,6 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Certificate Transparency Log Integration** (RFC 6962)
+  - Production-ready transparency log verification supporting Trillian and Rekor (Sigstore)
+  - Merkle tree inclusion and consistency proofs for tamper-evident audit trails
+  - Multi-log witness support for cross-organizational verification
+  - Offline verification capability with cached proofs
+  - 666 comprehensive tests covering all RFC 6962 operations
+  - Full documentation in `docs/TRANSPARENCY_LOG.md`
+  - Enterprise-ready for aerospace (AS9100D), manufacturing (ISO 9001:2015), healthcare (FDA 21 CFR Part 11)
+
+- **did:web Support for Organization Identities**
+  - Resolution of `did:web` identifiers for organizational public keys
+  - Support for multiple key formats: publicKeyBase58, publicKeyMultibase, publicKeyJwk
+  - End-to-end signature verification with did:web resolution
+  - Integration with existing DID resolver infrastructure
+  - 435 comprehensive tests including edge cases and error handling
+  - Full documentation in `docs/DID_WEB_GUIDE.md`
+  - Example workflows demonstrating organization identity verification
+
 - **Production Signature Verification** (Phase 1.2 Complete)
   - Full Ed25519 cryptographic signature verification
   - DID resolution for `did:key` identifiers (self-describing keys)
