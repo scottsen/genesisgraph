@@ -107,14 +107,17 @@ The updated specification (§9.2) defines three practical patterns for privacy-p
 - Multi-log witness support
 - Offline verification capability
 - Consistency proofs for append-only guarantees
+- **Production-ready Trillian and Rekor (Sigstore) integration**
 
 **Use cases:**
 - Cross-organizational audit trails
-- Regulated industry compliance
+- Regulated industry compliance (AS9100D, ISO 9001:2015, FDA 21 CFR Part 11)
 - Supply chain time-stamping
 - Multi-party verification requirements
 
 **Example:** All levels can use transparency anchoring (see Level B and C examples)
+
+**Documentation:** See [docs/TRANSPARENCY_LOG.md](docs/TRANSPARENCY_LOG.md) for detailed usage and API reference.
 
 ## Disclosure Levels
 

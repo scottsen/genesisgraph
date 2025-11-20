@@ -33,6 +33,12 @@ try:
 except ImportError:
     DID_RESOLVER_AVAILABLE = False
 
+try:
+    from .transparency_log import TransparencyLogVerifier
+    TRANSPARENCY_LOG_AVAILABLE = True
+except ImportError:
+    TRANSPARENCY_LOG_AVAILABLE = False
+
 from .errors import SchemaError, ValidationError
 
 # Security: Input size limits to prevent DoS
@@ -56,7 +62,7 @@ class GenesisGraphValidator:
     """
 
     def __init__(self, schema_path: Optional[str] = None, verify_signatures: bool = False,
-                 use_schema: bool = False):
+                 use_schema: bool = False, verify_transparency: bool = False):
         """
         Initialize validator
 
@@ -64,16 +70,26 @@ class GenesisGraphValidator:
             schema_path: Path to JSON Schema file. If None and use_schema=True, uses bundled schema.
             verify_signatures: If True, cryptographically verify signatures (requires keys)
             use_schema: If True, enable JSON Schema validation (default: False for backwards compatibility)
+            verify_transparency: If True, verify transparency log inclusion proofs (RFC 6962)
         """
         self.schema_path = schema_path
         self.schema = None
         self.verify_signatures = verify_signatures
         self.use_schema = use_schema
+        self.verify_transparency = verify_transparency
 
         # Initialize DID resolver if signature verification is enabled
         self.did_resolver = None
         if verify_signatures and DID_RESOLVER_AVAILABLE:
             self.did_resolver = DIDResolver()
+
+        # Initialize transparency log verifier if enabled
+        self.transparency_verifier = None
+        if verify_transparency and TRANSPARENCY_LOG_AVAILABLE:
+            self.transparency_verifier = TransparencyLogVerifier(
+                verify_proofs=True,
+                fetch_from_logs=False
+            )
 
         # Auto-detect bundled schema if schema validation is enabled
         if use_schema and schema_path is None:
@@ -392,6 +408,15 @@ class GenesisGraphValidator:
                         sig_errors = self._verify_signature(attestation, operation_data, context)
                         errors.extend(sig_errors)
 
+        # Verify transparency log anchoring if present and enabled
+        if 'transparency' in attestation and self.verify_transparency:
+            transparency_errors = self._verify_transparency_anchoring(
+                attestation['transparency'],
+                operation_data,
+                context
+            )
+            errors.extend(transparency_errors)
+
         return errors
 
     def _is_valid_signature_format(self, signature: str) -> bool:
@@ -503,6 +528,91 @@ class GenesisGraphValidator:
             errors.append(f"{context}: {algo} signature verification not yet implemented")
         else:
             errors.append(f"{context}: unsupported signature algorithm: {algo}")
+
+        return errors
+
+    def _verify_transparency_anchoring(
+        self,
+        transparency_entries: List[Dict],
+        operation_data: Optional[Dict],
+        context: str
+    ) -> List[str]:
+        """
+        Verify Certificate Transparency-style anchoring in transparency logs
+
+        Validates that operations are anchored in one or more transparency logs
+        with cryptographic inclusion proofs (RFC 6962).
+
+        Args:
+            transparency_entries: List of transparency log entries
+            operation_data: The operation being anchored
+            context: Context string for error messages
+
+        Returns:
+            List of error messages (empty if valid)
+
+        Notes:
+            - Verifies RFC 6962 Merkle inclusion proofs
+            - Supports multi-witness validation across multiple logs
+            - Provides tamper-evident audit trail for critical operations
+        """
+        errors = []
+
+        if not TRANSPARENCY_LOG_AVAILABLE:
+            errors.append(
+                f"{context}: transparency log verification not available "
+                "(transparency_log module not imported)"
+            )
+            return errors
+
+        if not self.transparency_verifier:
+            errors.append(
+                f"{context}: transparency verifier not initialized "
+                "(verify_transparency=False?)"
+            )
+            return errors
+
+        if not isinstance(transparency_entries, list):
+            errors.append(
+                f"{context}: transparency must be a list, got {type(transparency_entries)}"
+            )
+            return errors
+
+        if len(transparency_entries) == 0:
+            # No transparency entries - not an error, just skip
+            return errors
+
+        # Compute the leaf data to verify
+        # The leaf data is the canonical JSON of the operation
+        if operation_data:
+            try:
+                canonical_json = self._canonical_json(operation_data)
+                leaf_data = canonical_json.encode('utf-8')
+            except Exception as e:
+                errors.append(
+                    f"{context}: failed to compute canonical JSON for transparency: {e}"
+                )
+                return errors
+        else:
+            # No operation data - can't verify
+            errors.append(
+                f"{context}: cannot verify transparency without operation data"
+            )
+            return errors
+
+        # Verify multi-witness
+        is_valid, messages = self.transparency_verifier.verify_multi_witness(
+            entries=transparency_entries,
+            leaf_data=leaf_data,
+            context=context,
+            require_all=False  # At least one witness must verify
+        )
+
+        if not is_valid:
+            # Convert messages to errors
+            for msg in messages:
+                if '✗' in msg or 'failed' in msg.lower():
+                    errors.append(msg)
 
         return errors
 
