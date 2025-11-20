@@ -1,0 +1,112 @@
+# GenesisGraph Predicate Disclosure Example
+#
+# This example demonstrates using predicate proofs to prove claims meet
+# thresholds WITHOUT revealing exact values.
+#
+# Use case: Prove "temperature <= 0.3" compliance without revealing temperature = 0.25
+# Business value: Enterprise IP protection + regulatory compliance
+
+spec_version: 0.1.0
+profile: gg-ai-basic-v1
+
+tools:
+  - id: claude
+    type: AIModel
+    vendor: Anthropic
+    version: claude-sonnet-4.5-20250929
+    identity:
+      did: did:web:api.anthropic.com
+
+entities:
+  - id: sensitive_prompt
+    type: Dataset
+    version: "1.0"
+    file: prompt.txt
+    hash: sha256:prompt_hash_here
+
+  - id: model_output
+    type: Dataset
+    version: "1.0"
+    file: output.json
+    hash: sha256:output_hash_here
+
+operations:
+  - id: compliant_ai_inference
+    type: inference
+    inputs: [sensitive_prompt@1.0]
+    outputs: [model_output@1.0]
+    tool: claude@claude-sonnet-4.5-20250929
+
+    # Parameters are NOT disclosed - proven via predicates
+    parameters:
+      _redacted: true
+
+    # Predicate attestation mode
+    attestation:
+      mode: predicate
+      timestamp: "2025-01-20T12:00:00Z"
+
+      # Predicate proofs demonstrate compliance without revealing values
+      predicate_proofs:
+        # Proof 1: Temperature compliance
+        - claim_name: temperature
+          predicate: lte  # Less than or equal
+          threshold: 0.3
+          satisfied: true  # This parameter IS compliant
+          commitment: sha256:commitment_to_actual_temperature_value
+          disclosed: false  # Exact value NOT disclosed
+          # value: null  # Would be 0.25 if disclosed=true
+
+        # Proof 2: Token limit compliance
+        - claim_name: max_tokens
+          predicate: lte
+          threshold: 8192
+          satisfied: true
+          commitment: sha256:commitment_to_actual_max_tokens
+          disclosed: false
+          # value: null  # Would be 4096 if disclosed=true
+
+        # Proof 3: Prompt length compliance
+        - claim_name: prompt_length
+          predicate: lte
+          threshold: 100000
+          satisfied: true
+          commitment: sha256:commitment_to_actual_prompt_length
+          disclosed: false
+          # value: null  # Would be 45000 if disclosed=true
+
+        # Proof 4: Top-p range compliance
+        - claim_name: top_p
+          predicate: in_range
+          threshold: [0.0, 1.0]  # Must be in [0, 1]
+          satisfied: true
+          commitment: sha256:commitment_to_actual_top_p
+          disclosed: false
+          # value: null  # Would be 0.9 if disclosed=true
+
+      # Optionally signed by compliance auditor
+      signer: did:web:compliance.example.com
+      signature: ed25519:base64_signature_of_predicate_proofs
+
+      # Anchored in transparency log
+      transparency:
+        - log_id: did:web:transparency.example.com
+          entry_id: "67890"
+          tree_size: 50000
+          inclusion_proof: base64_proof
+
+metadata:
+  description: "AI inference with predicate disclosure for compliance"
+  compliance_framework: "Internal AI Policy v2.1"
+  privacy_level: "Maximum - no exact values disclosed"
+  verifier_capabilities: "Can verify compliance without seeing parameters"
+  use_case: |
+    Enterprise wants to prove:
+    1. Model parameters met policy requirements
+    2. Without revealing exact parameters (IP protection)
+    3. While allowing third-party compliance verification
+
+    This enables:
+    - Competitive advantage (hidden parameters)
+    - Regulatory compliance (proven constraints)
+    - Audit trail (transparency log)

@@ -50,6 +50,16 @@ security = [
     "bandit>=1.7.5,<2.0",
     "safety>=2.3.5,<4.0",
 ]
+credentials = [
+    # SD-JWT support (IETF reference implementation)
+    "sd-jwt>=0.10.0,<1.0",
+    # JWT/JWK handling
+    "jwcrypto>=1.5.0,<2.0",
+    # Zero-knowledge proofs for range proofs and BBS+
+    "zksk>=1.1.0,<2.0",
+    # Petlib for pairing-based cryptography (BBS+ foundation)
+    "petlib>=0.0.45,<1.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/genesisgraph/genesisgraph"

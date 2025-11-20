@@ -1,0 +1,92 @@
+# GenesisGraph SD-JWT Selective Disclosure Example
+#
+# This example demonstrates using SD-JWT (Selective Disclosure JWT) attestations
+# to prove claims about AI model execution while selectively disclosing parameters.
+#
+# Use case: Prove model compliance without revealing proprietary prompts or exact parameters
+
+spec_version: 0.1.0
+profile: gg-ai-basic-v1
+
+tools:
+  - id: claude
+    type: AIModel
+    vendor: Anthropic
+    version: claude-sonnet-4.5-20250929
+    identity:
+      did: did:web:api.anthropic.com
+    capabilities:
+      max_context: 200000
+      supports_tools: true
+
+entities:
+  - id: input_data
+    type: Dataset
+    version: "1.0"
+    file: input.json
+    hash: sha256:abc123...
+
+  - id: output_data
+    type: Dataset
+    version: "1.0"
+    file: output.json
+    hash: sha256:def456...
+
+operations:
+  - id: ai_inference
+    type: inference
+    inputs: [input_data@1.0]
+    outputs: [output_data@1.0]
+    tool: claude@claude-sonnet-4.5-20250929
+
+    # Parameters are selectively disclosable via SD-JWT
+    # Some parameters always disclosed, others only via disclosure proofs
+    parameters:
+      model: claude-sonnet-4.5-20250929
+      # temperature, max_tokens, system_prompt are in SD-JWT disclosures
+
+    # SD-JWT attestation mode
+    attestation:
+      mode: sd-jwt
+      timestamp: "2025-01-20T12:00:00Z"
+
+      # SD-JWT structure
+      sd_jwt:
+        # The SD-JWT token (compact serialization)
+        # In practice, this would be: eyJhbGc....<base64>
+        sd_jwt: "eyJhbGciOiJFZERTQSIsInR5cCI6InNkK2p3dCJ9.eyJpc3MiOiJkaWQ6d2ViOmFwaS5hbnRocm9waWMuY29tIiwiaWF0IjoxNzM3MzY5NjAwLCJleHAiOjE3MzczNzMyMDAsIm1vZGVsIjoiY2xhdWRlLXNvbm5ldC00LjUtMjAyNTA5MjkiLCJfc2RfdGVtcGVyYXR1cmUiOnsic2VsZWN0aXZlbHlfZGlzY2xvc2FibGUiOnRydWUsImNsYWltIjoidGVtcGVyYXR1cmUifSwiX3NkX21heF90b2tlbnMiOnsic2VsZWN0aXZlbHlfZGlzY2xvc2FibGUiOnRydWUsImNsYWltIjoibWF4X3Rva2VucyJ9LCJfc2Rfc3lzdGVtX3Byb21wdCI6eyJzZWxlY3RpdmVseV9kaXNjbG9zYWJsZSI6dHJ1ZSwiY2xhaW0iOiJzeXN0ZW1fcHJvbXB0In19.c2lnbmF0dXJlX2hlcmU"
+
+        # Selective disclosures (holder chooses which to reveal)
+        disclosures:
+          # Disclosure 1: temperature
+          - claim_name: temperature
+            claim_value: 0.25
+            salt: a1b2c3d4e5f6
+            hash: sha256:hash_of_salt_claim_value
+
+          # Disclosure 2: max_tokens
+          - claim_name: max_tokens
+            claim_value: 4096
+            salt: f6e5d4c3b2a1
+            hash: sha256:another_hash
+
+          # Disclosure 3: system_prompt (NOT disclosed in this presentation)
+          # - claim_name: system_prompt
+          #   claim_value: "You are a helpful AI assistant..."
+          #   salt: x9y8z7w6v5
+          #   hash: sha256:prompt_hash
+
+        issuer: did:web:api.anthropic.com
+        algorithm: EdDSA
+
+      # Transparency log anchoring
+      transparency:
+        - log_id: did:web:transparency.anthropic.com
+          entry_id: "12345"
+          tree_size: 100000
+          inclusion_proof: base64_encoded_proof_here
+
+metadata:
+  description: "AI inference with SD-JWT selective disclosure"
+  use_case: "Prove model compliance while protecting IP"
+  disclosure_strategy: "Disclose temperature and max_tokens, hide system_prompt"
