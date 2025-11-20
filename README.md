@@ -17,11 +17,13 @@ tags:
 
 # GenesisGraph: Universal Verifiable Process Provenance
 
-**v0.3.0 — November 2025**
+**v0.4.0 — November 2025**
 
 GenesisGraph is an **open standard for proving how things were made**. It provides cryptographically verifiable provenance for AI pipelines, manufacturing, scientific research, healthcare, and any workflow where "show me how you made this" matters.
 
 **The Innovation:** Three-level selective disclosure (A/B/C) enables proving compliance without revealing trade secrets—solving the "certification vs IP protection" dilemma that blocks adoption in regulated industries.
+
+**New in v0.4.0:** Agent provenance (AI governance), delegation & authorization, lifecycle & revocation, threat model, and governance framework.
 
 ---
 
@@ -36,7 +38,19 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 5. **[STRATEGIC_CONTEXT.md](STRATEGIC_CONTEXT.md)** - Why this matters, adoption strategy, 5-year vision
 6. **[CRITICAL_GAPS_ANALYSIS.md](CRITICAL_GAPS_ANALYSIS.md)** - Strategic roadmap for v1.0, missing layers, improvements
 
+**🆕 v0.4.0 Strategic Extensions:**
+
+7. **[docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)** - Security posture, adversary model, GG-SEC levels
+8. **[docs/DELEGATION_AND_AUTHORIZATION.md](docs/DELEGATION_AND_AUTHORIZATION.md)** - Authority chains, policy integration
+9. **[docs/AGENT_PROVENANCE_EXTENSION.md](docs/AGENT_PROVENANCE_EXTENSION.md)** - AI agent governance, reasoning traces
+10. **[docs/LIFECYCLE_AND_REVOCATION.md](docs/LIFECYCLE_AND_REVOCATION.md)** - Temporal validation, revocation framework
+11. **[GOVERNANCE.md](GOVERNANCE.md)** - Anti-capture design, foundation structure, vendor neutrality
+
 **Enterprise users:** See **[docs/DID_WEB_GUIDE.md](docs/DID_WEB_GUIDE.md)** for did:web support - use your organization's domain for identity management.
+
+**Security teams:** Start with **[docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)** to understand security levels (GG-SEC-1 through GG-SEC-4).
+
+**AI developers:** See **[docs/AGENT_PROVENANCE_EXTENSION.md](docs/AGENT_PROVENANCE_EXTENSION.md)** for provenance of autonomous agents, reasoning traces, and multi-turn conversations.
 
 **Want to integrate?** See `USE_CASES.md` §Integration Patterns for wrapper/native/post-hoc approaches.
 

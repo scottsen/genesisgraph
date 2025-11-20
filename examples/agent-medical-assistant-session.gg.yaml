@@ -1,0 +1,512 @@
+# GenesisGraph Agent Provenance Example: Medical AI Assistant Session
+#
+# This example demonstrates:
+# - AI agent with HIPAA delegation chain
+# - Multi-turn conversation provenance
+# - Reasoning trace with selective disclosure
+# - Tool use authorization
+# - Human-in-the-loop review
+# - Safety evaluation
+# - Memory checkpoints
+
+spec_version: 0.4.0
+profile: gg-agent-v1
+security_level: GG-SEC-3
+document_type: agent_session_provenance
+
+metadata:
+  session_id: session-20251115-medical-assist-001
+  title: "Medical AI Assistant - Drug Interaction Analysis Session"
+  description: "24-turn conversation analyzing drug interactions for patient"
+  created_at: 2025-11-15T10:00:00Z
+  created_by: did:agent:claude-medical-assistant
+
+# Agent Declaration
+agents:
+  - id: claude_medical_assistant
+    type: AIAgent
+    name: "Medical Diagnosis Assistant Claude"
+    model: claude-sonnet-4-5
+    vendor: Anthropic
+    version: 20250929
+
+    identity:
+      did: did:agent:claude-medical-assistant-session-20251115-001
+      parent: did:org:hospital-west-ai-systems
+
+    capabilities:
+      tools:
+        - medical_database_query
+        - drug_interaction_checker
+        - clinical_guidelines_search
+      memory: contextual_window_200k
+      reasoning: chain_of_thought
+      multimodal: [text]
+      languages: [en, es]
+
+    constraints:
+      max_cost_usd: 10.00
+      max_tokens_per_response: 4000
+      allowed_tools: [medical_database_query, drug_interaction_checker, clinical_guidelines_search]
+      prohibited_actions: [file_write, network_external, data_export]
+      safety_filters: enabled
+      human_oversight_required: true
+
+    delegation:
+      delegated_by: did:person:dr_sarah_chen
+      credential: vc:agent-delegation-20251115
+      valid_from: 2025-11-15T08:00:00Z
+      valid_until: 2025-11-15T20:00:00Z
+
+    attestation:
+      safety_certification:
+        evaluator: did:org:anthropic-safety-team
+        certification: vc:claude-safety-cert-2025-q4
+        tests_passed:
+          - harmfulness_refusal
+          - jailbreak_resistance
+          - bias_mitigation
+          - factual_accuracy
+        issued_at: 2025-10-01T00:00:00Z
+        valid_until: 2026-02-01T00:00:00Z
+
+    provenance:
+      session_start: 2025-11-15T10:00:00Z
+      session_end: 2025-11-15T11:45:00Z
+      total_turns: 24
+      total_operations: 67
+      total_cost_usd: 4.73
+
+# Tools Used
+tools:
+  - id: medical_database_query
+    type: DatabaseService
+    version: 3.2.1
+    vendor: Hospital West IT
+    identity:
+      did: did:svc:med-db-hospital-west
+    lifecycle:
+      released_at: 2024-01-15T00:00:00Z
+      valid_from: 2024-01-15T00:00:00Z
+      valid_until: null
+
+  - id: drug_interaction_checker
+    type: ExternalAPI
+    version: 2.8.0
+    vendor: DrugInteractionDB Inc
+    identity:
+      did: did:svc:drug-interaction-api
+    lifecycle:
+      released_at: 2025-06-01T00:00:00Z
+      valid_from: 2025-06-01T00:00:00Z
+      valid_until: null
+
+# Entities (Conversation Turns & Memory Snapshots)
+entities:
+  # Initial memory state
+  - id: agent_memory_initial
+    type: AgentMemorySnapshot
+    version: initial
+    agent: claude_medical_assistant
+    hash: sha256:1a2b3c4d5e6f7890abcdef...
+    timestamp: 2025-11-15T10:00:00Z
+    privacy:
+      encryption: age_encryption
+      recipients: [did:person:dr_sarah_chen]
+
+  # Turn 1: User asks about drug interactions
+  - id: user_message_turn_1
+    type: UserMessage
+    version: turn_1
+    hash: sha256:user_msg_1_hash...
+    timestamp: 2025-11-15T10:00:12Z
+    derived_from: []
+
+  - id: agent_response_turn_1
+    type: AgentResponse
+    version: turn_1
+    hash: sha256:agent_resp_1_hash...
+    timestamp: 2025-11-15T10:01:05Z
+    derived_from: [user_message_turn_1, agent_memory_initial]
+
+  # Turn 5: Memory checkpoint
+  - id: agent_memory_checkpoint_turn_5
+    type: AgentMemorySnapshot
+    version: turn_5
+    agent: claude_medical_assistant
+    hash: sha256:memory_turn_5_hash...
+    timestamp: 2025-11-15T10:15:00Z
+    derived_from: [agent_memory_initial, user_message_turn_1, agent_response_turn_1]
+    privacy:
+      encryption: age_encryption
+      recipients: [did:person:dr_sarah_chen]
+
+  # ... (additional turns omitted for brevity)
+
+  # Final response after human review
+  - id: final_recommendation
+    type: AgentResponse
+    version: turn_24_approved
+    hash: sha256:final_rec_hash...
+    timestamp: 2025-11-15T11:45:00Z
+    derived_from: [user_message_turn_24, agent_memory_checkpoint_turn_20]
+
+# Operations
+operations:
+  # Turn 5: Agent reasoning with tool use
+  - id: op_reasoning_turn_5
+    type: agent_reasoning_step
+    agent: claude_medical_assistant
+    turn: 5
+    timestamp: 2025-11-15T10:14:30Z
+
+    inputs:
+      - user_message_turn_5
+      - agent_memory_checkpoint_turn_4
+
+    outputs:
+      - reasoning_trace_turn_5
+      - tool_invocations_turn_5
+      - response_draft_turn_5
+
+    # Authorization
+    authorization:
+      delegated_by: did:person:dr_sarah_chen
+      delegation_chain:
+        # Hospital → Doctor
+        - grantor: did:org:hospital-west
+          grantee: did:person:dr_sarah_chen
+          capability: medical_data_access
+          credential: vc:hipaa-delegation-2025
+          issued_at: 2025-01-01T00:00:00Z
+          expires_at: 2025-12-31T23:59:59Z
+          constraints:
+            departments: [cardiology, emergency]
+            data_retention: prohibited
+            audit_logging: required
+
+        # Doctor → AI Agent
+        - grantor: did:person:dr_sarah_chen
+          grantee: did:agent:claude-medical-assistant-session-20251115-001
+          capability: inference_with_phi
+          credential: vc:agent-delegation-20251115
+          issued_at: 2025-11-15T08:00:00Z
+          expires_at: 2025-11-15T20:00:00Z
+          constraints:
+            max_records_per_day: 100
+            human_review_required: true
+            audit_logging: required
+            temperature_max: 0.3
+
+      policy_evaluation:
+        policy_id: hipaa-safe-harbor-v1
+        policy_version: 2.1.0
+        decision: permit
+        evaluated_at: 2025-11-15T10:14:29Z
+        evaluator: did:svc:opa-policy-engine
+        constraints_satisfied:
+          - constraint: max_records_per_day
+            limit: 100
+            actual: 12
+            satisfied: true
+          - constraint: temperature_max
+            limit: 0.3
+            actual: 0.2
+            satisfied: true
+        all_constraints_met: true
+
+    # Reasoning trace with selective disclosure
+    reasoning:
+      method: chain_of_thought_with_proprietary_prompts
+      disclosure_level: selective
+
+      visible_steps:
+        - step: 1
+          thought: "User asks about drug interaction between metformin and lisinopril"
+          action: null
+          observation: null
+
+        - step: 2
+          thought: "Need to query medical database for interaction data"
+          action:
+            type: tool_call
+            tool: medical_database_query
+            query: "interaction metformin lisinopril"
+          observation: "Database returns: Minor interaction, monitor potassium levels"
+
+        - step: 3
+          thought: "Should verify with secondary source to ensure accuracy"
+          action:
+            type: tool_call
+            tool: drug_interaction_checker
+            drugs: [metformin, lisinopril]
+          observation: "Confirmed: Minor interaction, clinical significance low"
+
+        - step: 4
+          thought: "Sufficient evidence from two independent sources"
+          action: null
+          observation: null
+
+        - step: 7
+          thought: "Recommendation: Continue both medications with potassium monitoring"
+          action: null
+          observation: null
+
+      sealed_steps:
+        commitment: sha256:merkle_root_reasoning_turn_5_abc123...
+        num_steps_sealed: 3
+        leaves_exposed:
+          - step: 2
+            hash: sha256:step2_hash...
+          - step: 4
+            hash: sha256:step4_hash...
+
+        # Proprietary prompt engineering sealed
+        policy_claims:
+          - claim: "Sealed reasoning contains no patient PII"
+            result: verified
+            verifier: did:svc:privacy-compliance-checker
+            signature: ed25519:privacy_claim_sig_xyz...
+
+          - claim: "Sealed reasoning aligned with AMA clinical guidelines"
+            result: verified
+            verifier: did:person:dr_sarah_chen
+            signature: ed25519:clinical_claim_sig_xyz...
+
+          - claim: "No hallucinated medical facts in sealed steps"
+            result: verified
+            verifier: did:svc:anthropic-factuality-checker
+            signature: ed25519:fact_check_sig_xyz...
+
+      conclusion:
+        recommendation: "Minor interaction between metformin and lisinopril. Continue both medications with regular potassium monitoring."
+        confidence: 0.93
+        sources: [medical_database_result_1, drug_interaction_api_result_1]
+
+    parameters:
+      temperature: 0.2
+      max_tokens: 2000
+      safety_settings:
+        harmful_content: block
+        medical_advice_disclaimer: required
+
+    attestation:
+      mode: verifiable
+      signer: did:agent:claude-medical-assistant-session-20251115-001
+      signature: ed25519:reasoning_sig_turn_5_xyz...
+      timestamp: 2025-11-15T10:14:45Z
+
+  # Tool invocation: Medical database query
+  - id: op_tool_use_med_db_turn_5
+    type: agent_tool_invocation
+    agent: claude_medical_assistant
+    turn: 5
+    reasoning_step: 2
+    timestamp: 2025-11-15T10:14:32Z
+
+    tool: medical_database_query@3.2.1
+    tool_did: did:svc:med-db-hospital-west
+
+    delegation_chain:
+      # Human → Agent
+      - grantor: did:person:dr_sarah_chen
+        grantee: did:agent:claude-medical-assistant-session-20251115-001
+        capability: use_medical_tools
+        credential: vc:agent-delegation-20251115
+
+      # Agent → Tool Service
+      - grantor: did:agent:claude-medical-assistant-session-20251115-001
+        grantee: did:svc:med-db-hospital-west
+        capability: database_query
+        credential: session_token:xyz789
+        constraints:
+          max_queries_per_session: 50
+          query_logging: required
+
+    inputs:
+      - query_text: "interaction metformin lisinopril"
+
+    outputs:
+      - query_results: "Minor interaction, monitor potassium levels"
+
+    parameters:
+      query: "interaction metformin lisinopril"
+      max_results: 10
+
+    policy_evaluation:
+      policy_id: hipaa-tool-use-v1
+      decision: permit
+      evaluator: did:svc:opa-policy-engine
+      constraints_satisfied:
+        - constraint: tool_in_allowed_list
+          allowed: [medical_database_query, drug_interaction_checker]
+          actual: medical_database_query
+          satisfied: true
+        - constraint: under_query_limit
+          limit: 50
+          actual: 12
+          satisfied: true
+
+    attestation:
+      mode: verifiable
+      signer: did:svc:med-db-hospital-west
+      signature: ed25519:tool_attestation_sig_turn_5_xyz...
+      timestamp: 2025-11-15T10:14:33Z
+
+  # Runtime safety check
+  - id: op_safety_check_turn_5
+    type: safety_evaluation
+    agent: claude_medical_assistant
+    turn: 5
+    timestamp: 2025-11-15T10:14:43Z
+
+    inputs:
+      - response_draft_turn_5
+
+    outputs:
+      - safety_evaluation_turn_5
+
+    safety_checks:
+      - check: harmful_content_detection
+        result: pass
+        flagged_categories: []
+        confidence: 0.99
+
+      - check: pii_leakage_detection
+        result: pass
+        pii_found: []
+
+      - check: medical_policy_compliance
+        policy_id: medical_advice_policy_v1
+        result: pass
+        violations: []
+
+      - check: factuality_score
+        result: pass
+        score: 0.96
+        sources_verified: 2
+
+    overall_result: safe_to_send
+
+    attestation:
+      signer: did:svc:anthropic-safety-runtime
+      signature: ed25519:runtime_safety_sig_turn_5_xyz...
+      timestamp: 2025-11-15T10:14:44Z
+
+  # Human review (Turn 15)
+  - id: op_human_review_turn_15
+    type: human_review
+    agent: claude_medical_assistant
+    turn: 15
+    timestamp: 2025-11-15T11:30:00Z
+
+    inputs:
+      - response_draft_turn_15
+      - reasoning_trace_turn_15
+      - conversation_context_turn_1_to_15
+
+    outputs:
+      - approved_response_turn_15
+
+    reviewer: did:person:dr_sarah_chen
+
+    review_decision:
+      decision: approved_with_modifications
+      reviewed_at: 2025-11-15T11:30:00Z
+      time_spent_seconds: 45
+
+      modifications:
+        - type: wording_change
+          before: "You should immediately stop taking lisinopril"
+          after: "Consult your prescribing physician about lisinopril dosage adjustment"
+          reason: "Agent recommendation too strong - requires physician approval for medication changes"
+
+      review_notes: "Recommendation medically sound but wording needed adjustment for liability and patient safety"
+
+    attestation:
+      mode: verifiable
+      signer: did:person:dr_sarah_chen
+      signature: ed25519:human_review_sig_turn_15_xyz...
+      timestamp: 2025-11-15T11:30:45Z
+
+  # Memory update (Turn 10)
+  - id: op_memory_update_turn_10
+    type: agent_memory_update
+    agent: claude_medical_assistant
+    turn: 10
+    timestamp: 2025-11-15T10:30:00Z
+
+    inputs:
+      - agent_memory_checkpoint_turn_9
+      - user_message_turn_10
+      - tool_results_turn_10
+      - reasoning_trace_turn_10
+
+    outputs:
+      - agent_memory_checkpoint_turn_10
+
+    memory_changes:
+      added_facts:
+        - "User is taking metformin 1000mg twice daily"
+        - "User recently started lisinopril 10mg daily"
+        - "User has type 2 diabetes and hypertension"
+        - "User's last HbA1c was 6.8%"
+
+      updated_context:
+        conversation_turns: 10
+        topics_discussed: [drug_interactions, diabetes_management, blood_pressure]
+
+      removed_items: []
+
+    privacy:
+      encryption: age_encryption
+      recipients: [did:person:dr_sarah_chen]
+
+    provenance:
+      memory_hash_previous: sha256:memory_turn_9_hash_abc...
+      memory_hash_current: sha256:memory_turn_10_hash_def...
+
+# Final Session Attestation
+attestation:
+  mode: verifiable
+  security_level: GG-SEC-3
+
+  multisig:
+    threshold: 2
+    signers:
+      - did:agent:claude-medical-assistant-session-20251115-001
+      - did:person:dr_sarah_chen
+    signatures:
+      - signer: did:agent:claude-medical-assistant-session-20251115-001
+        signature: ed25519:session_sig_agent_xyz...
+        timestamp: 2025-11-15T11:45:25Z
+      - signer: did:person:dr_sarah_chen
+        signature: ed25519:session_sig_human_xyz...
+        timestamp: 2025-11-15T11:45:30Z
+
+  transparency:
+    - log_id: did:log:hospital-west-audit
+      entry_id: 0x9a8b7c6d
+      tree_size: 892471
+      inclusion_proof: base64:inclusion_proof_abc123...
+    - log_id: did:log:hipaa-compliance
+      entry_id: 0x1f2e3d4c
+      tree_size: 428934
+      inclusion_proof: base64:inclusion_proof_def456...
+
+  session_summary:
+    total_turns: 24
+    total_operations: 67
+    total_tool_uses: 18
+    human_reviews: 3  # at turns 5, 15, 24
+    safety_checks_passed: 24
+    total_cost_usd: 4.73
+    session_duration_minutes: 105
+    patient_outcome: information_provided
+    follow_up_required: physician_consultation_recommended
+
+  compliance:
+    hipaa_safe_harbor: compliant
+    medical_advice_disclaimer: included
+    human_oversight: verified
+    audit_trail: complete

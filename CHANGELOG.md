@@ -9,21 +9,108 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.4.0] - 2025-11-20
+
 ### Added
+
+- **Formal Threat Model & Security Posture** ([docs/THREAT_MODEL.md](docs/THREAT_MODEL.md))
+  - Comprehensive adversary model covering 7 attacker classes
+  - Security levels (GG-SEC-1 through GG-SEC-4) for different risk profiles
+  - Attack-defense matrix for common threat vectors
+  - Trust assumptions documentation
+  - Failure modes and mitigations
+  - Security review framework for enterprise adoption
+
+- **Delegation & Authorization Model** ([docs/DELEGATION_AND_AUTHORIZATION.md](docs/DELEGATION_AND_AUTHORIZATION.md))
+  - Complete delegation chain framework for multi-agent ecosystems
+  - Authorization proof schema for operation-level access control
+  - Policy integration with OPA (Open Policy Agent) and AWS Cedar
+  - Constraint enforcement and validation (rate limits, data scope, time windows)
+  - Verifiable credentials (VC) and ZCAP-LD integration
+  - New `gg-delegation-v1` profile for delegation-aware provenance
+  - Closes the "authority → accountability" loop for AI agents
+
+- **Agent Provenance Extension (GG-Agent-v1)** ([docs/AGENT_PROVENANCE_EXTENSION.md](docs/AGENT_PROVENANCE_EXTENSION.md))
+  - Full specification for AI agent provenance (multi-turn conversations, reasoning traces, tool use)
+  - Agent object model with capabilities, constraints, and delegation
+  - Reasoning trace provenance with selective disclosure (sealed steps with Merkle commitments)
+  - Agent memory & state tracking (checkpoints, memory evolution)
+  - Multi-turn conversation provenance (entity chains for each turn)
+  - Agent-to-tool delegation chains with policy evaluation
+  - Safety & alignment attestations (certification, runtime checks)
+  - New operation types: `agent_reasoning_step`, `agent_tool_invocation`, `agent_memory_update`, `human_review`, `safety_evaluation`
+  - New entity types: `AgentMemorySnapshot`, `UserMessage`, `AgentResponse`, `ReasoningTrace`
+  - Positions GenesisGraph as THE standard for AI agent governance
+
+- **Lifecycle & Revocation Framework** ([docs/LIFECYCLE_AND_REVOCATION.md](docs/LIFECYCLE_AND_REVOCATION.md))
+  - Temporal validation ("Was this tool version safe at the time of use?")
+  - Entity lifecycle tracking (created, active, deprecated, revoked, expired states)
+  - Tool lifecycle with CVE tracking and security advisories
+  - Attestation revocation with transparency log integration
+  - Revocation registry architecture and API
+  - Temporal validation at specific points in time (`--at-time` parameter)
+  - Freshness requirements for real-time use cases
+  - Replacement chains and revocation propagation
+
+- **Governance Framework** ([GOVERNANCE.md](GOVERNANCE.md))
+  - Multi-stakeholder board structure (9 seats across AI, manufacturing, research, government, civil society)
+  - Anti-capture safeguards (no single-entity control, term limits, geographic diversity)
+  - Vendor neutrality requirements (Apache 2.0 reference implementations, no proprietary extensions)
+  - Fork rights and trademark policy
+  - Compatibility certification program ("GenesisGraph Compatible v0.X")
+  - Succession planning and emergency procedures
+  - Foundation funding model (membership tiers, government grants, cost-recovery services)
+  - Community participation framework (working groups, contribution process)
+  - Dispute resolution mechanisms (4-level escalation)
+  - Prevents capture by large actors (AWS, Azure, Google, defense contractors)
+
+- **Comprehensive Example: Medical AI Assistant Session** ([examples/agent-medical-assistant-session.gg.yaml](examples/agent-medical-assistant-session.gg.yaml))
+  - 24-turn conversation with drug interaction analysis
+  - HIPAA delegation chain (Hospital → Doctor → AI Agent)
+  - Reasoning traces with selective disclosure (proprietary prompts sealed)
+  - Tool use authorization (medical database, drug interaction checker)
+  - Human-in-the-loop review at critical decision points
+  - Runtime safety evaluation (harmful content, PII leakage, policy compliance)
+  - Memory checkpoints tracking conversation state evolution
+  - Multi-witness attestation (agent + human signatures)
+  - Transparency log anchoring for audit trail
 
 - **Critical Gaps Analysis for v1.0** ([CRITICAL_GAPS_ANALYSIS.md](CRITICAL_GAPS_ANALYSIS.md))
   - Comprehensive analysis identifying 10 strategic gaps and improvements
-  - Formal threat model and security posture requirements
-  - Delegation and authorization model for multi-agent ecosystems
-  - Lifecycle and revocation framework for temporal validity
-  - Governance and registry infrastructure design
-  - Human-oriented UX patterns and templates
-  - Formal semantics for operation chains and auditability
-  - Conflict resolution and dispute mechanisms
-  - Anti-capture design and governance safeguards
-  - AI agent integration and decision trace provenance
-  - Economic value flows and ecosystem sustainability
+  - Roadmap for addressing gaps in v1.0 release
   - Positions GenesisGraph for global adoption and multi-agent AI governance
+
+### Changed
+
+- **README.md**: Updated to v0.4.0 with references to new strategic documentation
+- **Documentation Structure**: Added 5 major new documents totaling ~12,000 words of specifications
+- **Security Posture**: Moved from implicit to explicit security guarantees with formal threat model
+
+### Impact
+
+This release represents a **strategic leap** for GenesisGraph:
+
+1. **Enterprise Readiness**: Threat model enables security teams to evaluate GenesisGraph
+2. **AI Governance**: Agent provenance positions GenesisGraph as THE standard for AI agent accountability
+3. **Regulatory Compliance**: Delegation + lifecycle frameworks enable HIPAA, FDA, AS9100D compliance
+4. **Long-Term Sustainability**: Governance framework prevents vendor capture, ensures community control
+5. **Temporal Trust**: Revocation framework enables forensic analysis ("Was this safe when we used it?")
+
+**Addresses Critical Gaps:**
+- Gap #1: Threat Model & Security Posture ✅
+- Gap #2: Delegation & Authorization ✅
+- Gap #3: Lifecycle & Revocation ✅
+- Gap #8: Anti-Capture Governance ✅
+- Gap #9: Agent Provenance ✅
+
+**Next Steps for v1.0:**
+- Implement reference validators for new profiles (`gg-delegation-v1`, `gg-agent-v1`)
+- Build revocation registry infrastructure
+- Create template system for common patterns (Gap #5)
+- Formal semantics documentation (Gap #6)
+- Economic model and marketplace (Gap #10)
 
 ---
 
