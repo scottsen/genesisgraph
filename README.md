@@ -70,6 +70,48 @@ genesisgraph/
     └── validator.py                # Signature verification with DID support
 ```
 
+## Industry-Specific Profile Validators
+
+GenesisGraph now includes **Phase 5 validation** with industry-specific profile validators for automated compliance checking:
+
+### Available Profiles
+
+- **gg-ai-basic-v1**: AI/ML pipeline validation
+  - Required parameters for AI operations (temperature, model version, etc.)
+  - FDA 21 CFR Part 11 compliance for electronic records
+  - Human review requirement checking for high-stakes decisions
+  - Data lineage and model versioning validation
+
+- **gg-cam-v1**: Computer-aided manufacturing validation
+  - ISO 9001:2015 quality management compliance
+  - Tolerance and dimensional accuracy tracking
+  - Machine calibration and maintenance verification
+  - Quality control checkpoint validation
+
+### Compliance Standards
+
+- **ISO 9001:2015**: Quality management systems validation
+- **FDA 21 CFR Part 11**: Electronic records and signatures compliance
+
+### Usage
+
+```bash
+# Auto-detect and validate profile
+genesisgraph validate workflow.gg.yaml --verify-profile
+
+# Validate with specific profile
+genesisgraph validate workflow.gg.yaml --verify-profile --profile gg-ai-basic-v1
+
+# Python API
+from genesisgraph import GenesisGraphValidator
+validator = GenesisGraphValidator(verify_profile=True, profile_id='gg-cam-v1')
+result = validator.validate_file('manufacturing.gg.yaml')
+```
+
+See **[docs/PROFILE_VALIDATORS.md](docs/PROFILE_VALIDATORS.md)** for complete documentation.
+
+---
+
 ## What's New: Selective Disclosure Patterns
 
 The updated specification (§9.2) defines three practical patterns for privacy-preserving provenance:

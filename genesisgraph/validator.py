@@ -70,7 +70,8 @@ class GenesisGraphValidator:
     """
 
     def __init__(self, schema_path: Optional[str] = None, verify_signatures: bool = False,
-                 use_schema: bool = False, verify_transparency: bool = False):
+                 use_schema: bool = False, verify_transparency: bool = False,
+                 verify_profile: bool = False, profile_id: Optional[str] = None):
         """
         Initialize validator
 
@@ -79,12 +80,16 @@ class GenesisGraphValidator:
             verify_signatures: If True, cryptographically verify signatures (requires keys)
             use_schema: If True, enable JSON Schema validation (default: False for backwards compatibility)
             verify_transparency: If True, verify transparency log inclusion proofs (RFC 6962)
+            verify_profile: If True, enable industry-specific profile validation (Phase 5)
+            profile_id: Optional profile ID (e.g., "gg-ai-basic-v1"). If None, auto-detects profile.
         """
         self.schema_path = schema_path
         self.schema = None
         self.verify_signatures = verify_signatures
         self.use_schema = use_schema
         self.verify_transparency = verify_transparency
+        self.verify_profile = verify_profile
+        self.profile_id = profile_id
 
         # Initialize DID resolver if signature verification is enabled
         self.did_resolver = None
@@ -98,6 +103,15 @@ class GenesisGraphValidator:
                 verify_proofs=True,
                 fetch_from_logs=False
             )
+
+        # Initialize profile registry if profile validation is enabled
+        self.profile_registry = None
+        if verify_profile:
+            try:
+                from .profiles import ProfileRegistry
+                self.profile_registry = ProfileRegistry()
+            except ImportError:
+                pass  # Profile validation not available
 
         # Auto-detect bundled schema if schema validation is enabled
         if use_schema and schema_path is None:
@@ -225,6 +239,26 @@ class GenesisGraphValidator:
                 warnings.append(f"Schema itself is invalid: {e.message}")
         elif not JSONSCHEMA_AVAILABLE:
             warnings.append("jsonschema not installed - skipping schema validation")
+
+        # 7. Profile validation (Phase 5 - if enabled)
+        if self.verify_profile and self.profile_registry:
+            try:
+                profile_result = self.profile_registry.validate_with_profile(
+                    data,
+                    profile_id=self.profile_id
+                )
+                errors.extend(profile_result.errors)
+                warnings.extend(profile_result.warnings)
+
+                # Add profile info to warnings if profile was detected
+                if profile_result.profile_id != "none":
+                    warnings.append(
+                        f"Profile validation: {profile_result.profile_id} "
+                        f"v{profile_result.profile_version} - "
+                        f"{'VALID' if profile_result.is_valid else 'INVALID'}"
+                    )
+            except Exception as e:
+                warnings.append(f"Profile validation error: {e}")
 
         is_valid = len(errors) == 0
         return ValidationResult(is_valid, errors, warnings, data)
