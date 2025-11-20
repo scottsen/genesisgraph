@@ -219,7 +219,7 @@ gg verify workflow.gg.yaml --check-signatures
 | Pattern | Effort | Example |
 |---------|--------|---------|
 | **Wrapper** (don't control tool) | 200 lines | Wrap OpenAI API calls |
-| **Native export** (control tool) | 500-1000 lines | TiaCAD integration |
+| **Native export** (control tool) | 500-1000 lines | Custom tool integration |
 | **Post-hoc reconstruction** | Variable | Parse logs/git commits |
 | **Orchestrator plugin** | 300-500 lines | Airflow DAG converter |
 
@@ -396,7 +396,6 @@ operations:
 **Status (v0.2):** Early adoption, reference implementations in progress.
 
 **Current integrations:**
-- **TiaCAD** (parametric CAD/CAM) - Production implementation underway
 - **AI workflow wrappers** - Python reference implementations
 
 **Future targets:**
@@ -437,7 +436,6 @@ operations:
 - did:web organizational identity support
 - Production signature verification
 - Reference examples
-- TiaCAD integration in progress
 
 **v0.5 (6 months):** Community feedback
 - CLI tools (`gg validate`, `gg verify`, `gg viz`)

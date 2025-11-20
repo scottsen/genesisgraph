@@ -315,7 +315,6 @@ python scripts/verify_transparency_anchoring.py examples/level-b-partial-envelop
 ### 4. Integrate with Your Tool
 
 See `USE_CASES.md` for integration guides:
-- **TiaCAD Integration** - Reference implementation for CAD/CAM provenance
 - **AI Pipeline Wrapper** - Add provenance to OpenAI/Anthropic calls
 - **Scientific Workflow** - Track research data pipelines
 
@@ -345,7 +344,7 @@ A: PROV-O is great for semantic web but lacks: (1) selective disclosure, (2) cap
 A: Yes! Progressive trust modes: basic → signed → verifiable → zk. Start with timestamps, upgrade to cryptography when needed.
 
 **Q: What if my tool doesn't support GenesisGraph?**
-A: Write a wrapper! See TiaCAD integration (200 lines) in `USE_CASES.md`.
+A: Write a wrapper! See integration examples in `USE_CASES.md`.
 
 **More questions?** See `FAQ.md`
 

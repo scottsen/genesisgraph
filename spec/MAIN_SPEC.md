@@ -120,38 +120,6 @@ You store:
 
 Now you can prove conformance and unlock recertification / supplier trust without sending proprietary toolpaths.
 
-**Reference Implementation: TiaCAD**
-
-[TiaCAD](../../tiacad) is a declarative parametric CAD/CAM system that serves as GenesisGraph's first complete manufacturing implementation. It demonstrates the full design-to-physical-part provenance pipeline:
-
-```
-Design YAML → CAD Build → STL → CAM Toolpaths → G-code → CNC → CMM Inspection
-     ↓            ↓          ↓           ↓            ↓       ↓           ↓
-                    All steps captured in verifiable provenance
-```
-
-**Key Features:**
-- **Complete pipeline coverage**: Design parameters flow through CAD, CAM, manufacturing
-- **Selective disclosure**: Hobby users get Level A (full), aerospace suppliers use Level C (sealed CAM toolpaths)
-- **Automatic export**: `tiacad build design.yaml --export-provenance` generates `.gg.yaml` alongside STL/G-code
-- **IP protection**: Proves ISO-9001/AS9100 compliance without revealing proprietary toolpath strategies
-
-**Example workflow:**
-
-```bash
-# Hobby maker (Level A: full disclosure)
-tiacad build guitar_hanger.yaml --export-provenance
-# → guitar_hanger.stl + guitar_hanger.gg.yaml (all parameters visible)
-
-# Aerospace supplier (Level C: sealed subgraph)
-tiacad build bracket.yaml --export-provenance --seal-cam
-# → bracket.stl + bracket.gg.yaml (CAM sealed, compliance claims visible)
-```
-
-**Business impact:** Aerospace suppliers can now prove process compliance to customers/auditors while protecting competitive CAM IP. This solves the "certification vs trade secrets" dilemma that has blocked digital thread adoption.
-
-**See:** `USE_CASES.md` §TiaCAD for complete integration details and code examples.
-
 ### 3.3 Scientific reproducibility
 
 A plot in a paper is challenged.

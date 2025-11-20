@@ -30,7 +30,7 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 **New to GenesisGraph?** Start here:
 
 1. **[QUICKSTART.md](QUICKSTART.md)** - 5-minute tutorial with simplest possible examples
-2. **[USE_CASES.md](USE_CASES.md)** - Real-world integrations (TiaCAD, AI, science, media)
+2. **[USE_CASES.md](USE_CASES.md)** - Real-world integrations (AI, science, media)
 3. **[FAQ.md](FAQ.md)** - Common questions: "Why not PROV-O?", "Do I need blockchain?", etc.
 4. **[spec/MAIN_SPEC.md](spec/MAIN_SPEC.md)** - Complete specification (886 lines)
 5. **[STRATEGIC_CONTEXT.md](STRATEGIC_CONTEXT.md)** - Why this matters, adoption strategy, 5-year vision
@@ -451,22 +451,6 @@ GenesisGraph provides:
 
 ## 🔬 Reference Implementations
 
-### TiaCAD (Manufacturing)
-
-[TiaCAD](../tiacad) is GenesisGraph's first complete production implementation:
-
-- **Pipeline:** Design YAML → CAD → STL → CAM → G-code → CNC → CMM
-- **Disclosure:** Hobby users (Level A full), aerospace suppliers (Level C sealed)
-- **Status:** Production implementation underway
-- **Impact:** Proves ISO-9001/AS9100 compliance without revealing CAM IP
-
-```bash
-tiacad build bracket.yaml --export-provenance --seal-cam
-# → bracket.gg.yaml with sealed CAM, policy claims visible
-```
-
-**Details:** `USE_CASES.md` §TiaCAD
-
 ### Python Wrapper (AI Pipelines)
 
 200-line wrapper for OpenAI/Anthropic APIs:
@@ -506,7 +490,7 @@ client.export_provenance("workflow.gg.yaml")
 ### For Decision-Makers
 
 1. Read `FAQ.md` (10 minutes) - addresses "Why not PROV-O?", "Do I need blockchain?"
-2. Review `USE_CASES.md` §TiaCAD - see complete reference implementation
+2. Review `USE_CASES.md` - see real-world integration examples
 3. Read `STRATEGIC_CONTEXT.md` (20 minutes) - understand adoption strategy, 5-year vision
 4. Evaluate business value for your domain (AI, manufacturing, research, etc.)
 
