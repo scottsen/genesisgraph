@@ -393,7 +393,7 @@ operations:
 
 ### Who is already using GenesisGraph?
 
-**Status (v0.1):** Early adoption, reference implementations in progress.
+**Status (v0.2):** Early adoption, reference implementations in progress.
 
 **Current integrations:**
 - **TiaCAD** (parametric CAD/CAM) - Production implementation underway
@@ -430,9 +430,12 @@ operations:
 
 ### What's the roadmap for GenesisGraph?
 
-**v0.1 (Current):** Public working draft
-- Core specification
+**v0.2 (Current):** Public working draft
+- Core specification with selective disclosure
 - JSON Schema validation
+- Certificate Transparency integration (RFC 6962)
+- did:web organizational identity support
+- Production signature verification
 - Reference examples
 - TiaCAD integration in progress
 
@@ -562,7 +565,7 @@ tools:
 
 **No one.** GenesisGraph is community-governed open standard.
 
-**Current status:** Individual stewardship (v0.1 public working draft)
+**Current status:** Individual stewardship (v0.2 public working draft)
 **Future governance:** W3C Community Group or Linux Foundation AI & Data
 
 **No vendor lock-in. No licensing fees. No IP claims.**

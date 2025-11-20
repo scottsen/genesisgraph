@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.2.0] - 2025-11-19
+
 ### Added
 - **Certificate Transparency Log Integration** (RFC 6962)
   - Production-ready transparency log verification supporting Trillian and Rekor (Sigstore)
@@ -28,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Full documentation in `docs/DID_WEB_GUIDE.md`
   - Example workflows demonstrating organization identity verification
 
-- **Production Signature Verification** (Phase 1.2 Complete)
+- **Production Signature Verification**
   - Full Ed25519 cryptographic signature verification
   - DID resolution for `did:key` identifiers (self-describing keys)
   - Canonical JSON encoding for signed data (RFC 8785-style)
@@ -36,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Support for mock signatures in testing mode
   - `DIDResolver` class with caching and multiple DID method support
 
-- **Security Documentation** (Phase 1.3 Complete)
+- **Security Documentation**
   - `SECURITY.md`: Comprehensive security policy and vulnerability reporting process
   - Threat model documentation (in-scope and out-of-scope threats)
   - Security best practices for users, creators, and developers
@@ -49,13 +53,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `did_resolver` attribute for DID-based public key lookup
   - Improved error messages for signature verification failures
   - Added `_canonical_json()` method for deterministic JSON encoding
+- **Documentation Updates**
+  - Updated README.md to v0.2 Public Working Draft
+  - Reorganized implementation roadmap to clearly show v0.1, v0.1.1, and v0.2 completions
+  - Updated roadmap: v0.3 next steps now focus on SD-JWT/BBS+, ZK proofs, and profile validators
 
 ### Fixed
 - Signature verification now performs actual cryptographic validation (was stub in v0.1.0-alpha)
-
-### In Progress
-- Working towards v0.1 Public Working Draft
-- Implementing improvements from 10-week enhancement plan
 
 ---
 

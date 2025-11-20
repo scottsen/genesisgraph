@@ -321,7 +321,7 @@ fidelity:
 
 ## The 5-Year Vision
 
-**2025:** v0.1 ships, prompt engineers adopt
+**2025:** v0.2 ships with transparency logs & organizational identity, prompt engineers adopt
 **2026:** Manufacturing pilot succeeds, v1.0 formal standard
 **2027:** Major ML platforms (Hugging Face, OpenAI) emit GenesisGraph
 **2028:** EU AI Act compliance tools require it
