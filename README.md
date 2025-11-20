@@ -19,7 +19,7 @@ tags:
 
 **v0.1 Public Working Draft — October 2025**
 
-GenesisGraph is an **open standard for proving how things were made**. It provides cryptographically verifiable provenance for AI pipelines, manufacturing, scientific research, and any workflow where "show me how you made this" matters.
+GenesisGraph is an **open standard for proving how things were made**. It provides cryptographically verifiable provenance for AI pipelines, manufacturing, scientific research, healthcare, and any workflow where "show me how you made this" matters.
 
 **The Innovation:** Three-level selective disclosure (A/B/C) enables proving compliance without revealing trade secrets—solving the "certification vs IP protection" dilemma that blocks adoption in regulated industries.
 
