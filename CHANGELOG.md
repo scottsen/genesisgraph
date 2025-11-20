@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Industry-Specific Profile Validators** (Phase 5 Validation)
+  - `gg-ai-basic-v1`: AI/ML pipeline validation with FDA 21 CFR Part 11 support
+  - `gg-cam-v1`: Computer-aided manufacturing validation with ISO-9001 compliance
+  - Profile registry with automatic profile detection based on operation types
+  - ISO 9001:2015 compliance validator for quality management systems
+  - FDA 21 CFR Part 11 compliance validator for electronic records and signatures
+  - Privacy-preserving validation with redacted parameter support
+  - CLI integration with `--verify-profile` and `--profile` flags
+  - Comprehensive test suite covering AI, manufacturing, and compliance validators
+  - Full documentation in `docs/PROFILE_VALIDATORS.md`
+  - Automated compliance checking for enterprise customers and regulatory use cases
+
 ### Removed
 - TiaCAD integration references from all documentation (closed #15)
   - Removed TiaCAD section from USE_CASES.md

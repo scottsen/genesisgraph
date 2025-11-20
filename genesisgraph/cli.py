@@ -34,16 +34,23 @@ if CLICK_AVAILABLE:
                   help='Verify cryptographic signatures (Ed25519)')
     @click.option('--verify-transparency', is_flag=True,
                   help='Verify transparency log inclusion proofs (RFC 6962)')
+    @click.option('--verify-profile', is_flag=True,
+                  help='Verify industry-specific profile requirements (Phase 5)')
+    @click.option('--profile', '-p', type=str,
+                  help='Profile ID to validate against (e.g., gg-ai-basic-v1, gg-cam-v1)')
     @click.option('--verbose', '-v', is_flag=True,
                   help='Verbose output')
     def validate(file_path: str, schema: Optional[str], verify_signatures: bool,
-                 verify_transparency: bool, verbose: bool):
+                 verify_transparency: bool, verify_profile: bool, profile: Optional[str],
+                 verbose: bool):
         """Validate a GenesisGraph document"""
 
         validator = GenesisGraphValidator(
             schema_path=schema,
             verify_signatures=verify_signatures,
-            verify_transparency=verify_transparency
+            verify_transparency=verify_transparency,
+            verify_profile=verify_profile,
+            profile_id=profile
         )
         result = validator.validate_file(file_path)
 
