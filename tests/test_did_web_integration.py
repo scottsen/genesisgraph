@@ -15,7 +15,7 @@ import pytest
 
 from genesisgraph.did_resolver import DIDResolver
 from genesisgraph.errors import ValidationError
-from genesisgraph.validator import GraphValidator
+from genesisgraph.validator import GenesisGraphValidator
 
 
 class TestDIDWebIntegration:
@@ -248,7 +248,7 @@ class TestDIDWebIntegration:
                 mock_verify = Mock()
                 mock_ed25519.VerifyingKey.from_bytes.return_value = mock_verify
 
-                validator = GraphValidator(verify_signatures=True)
+                validator = GenesisGraphValidator(verify_signatures=True)
 
                 attestation = {
                     'signer': 'did:web:hospital.example.com',
