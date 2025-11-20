@@ -130,7 +130,7 @@ genesisgraph/
 │   ├── verify_sealed_subgraph.py           # Merkle inclusion proof verifier
 │   └── verify_transparency_anchoring.py    # Transparency log anchor verifier
 └── genesisgraph/
-    ├── did_resolver.py             # DID resolution (did:key, did:web)
+    ├── did_resolver.py             # DID resolution (did:key, did:web, did:ion, did:ethr)
     └── validator.py                # Signature verification with DID support
 ```
 
@@ -498,12 +498,14 @@ This package represents the **v0.2** deliverables for selective disclosure:
 - [x] 666 comprehensive tests covering all RFC 6962 operations
 - [x] Full documentation in `docs/TRANSPARENCY_LOG.md`
 - [x] Enterprise-ready for regulated industries (AS9100D, ISO 9001:2015, FDA 21 CFR Part 11)
+- [x] Additional DID methods (did:ion, did:ethr) with comprehensive test coverage
+- [x] ION (Sidetree on Bitcoin) DID resolution with Universal Resolver support
+- [x] Ethereum DID resolution with multi-network support
 
 **Next steps (v0.3):**
 - [ ] SD-JWT / BBS+ selective disclosure (cryptographic privacy)
 - [ ] ZK proof-of-policy templates (zero-knowledge compliance)
 - [ ] Profile-specific validators (gg-ai-basic-v1, gg-cam-v1)
-- [ ] Additional DID methods (did:ion, did:ethr)
 - [ ] Python/JavaScript SDK libraries
 
 ## Comparison Matrix: Verification Strengths

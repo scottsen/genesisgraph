@@ -6,11 +6,15 @@ Resolves Decentralized Identifiers (DIDs) to public keys for signature verificat
 Supported DID methods:
 - did:key - Self-describing cryptographic keys (no resolution needed)
 - did:web - Web-based DIDs (resolves via HTTPS)
+- did:ion - Sidetree-based DIDs on Bitcoin (resolves via ION nodes)
+- did:ethr - Ethereum-based DIDs (resolves via Ethereum/Universal Resolver)
 
 References:
 - W3C DID Core: https://www.w3.org/TR/did-core/
 - did:key Method: https://w3c-ccg.github.io/did-method-key/
 - did:web Method: https://w3c-ccg.github.io/did-method-web/
+- did:ion Method: https://identity.foundation/ion/
+- did:ethr Method: https://github.com/decentralized-identity/ethr-did-resolver
 """
 
 import base64
@@ -63,6 +67,10 @@ MAX_BASE58_LENGTH = 128  # Maximum base58 string length to prevent DoS
 MAX_DID_LENGTH = 512     # Maximum DID length
 MAX_RESPONSE_SIZE = 1_000_000  # 1MB max for DID documents
 
+# Default resolver endpoints for did:ion and did:ethr
+DEFAULT_ION_RESOLVER = "https://ion.tbd.website/identifiers/"
+DEFAULT_ETHR_RESOLVER = "https://dev.uniresolver.io/1.0/identifiers/"
+
 
 class DIDResolver:
     """
@@ -74,20 +82,31 @@ class DIDResolver:
         >>> # Use public_key for signature verification
     """
 
-    def __init__(self, timeout: int = 10, cache_ttl: int = 300, rate_limit: int = 10):
+    def __init__(
+        self,
+        timeout: int = 10,
+        cache_ttl: int = 300,
+        rate_limit: int = 10,
+        ion_resolver: str = DEFAULT_ION_RESOLVER,
+        ethr_resolver: str = DEFAULT_ETHR_RESOLVER
+    ):
         """
         Initialize DID resolver
 
         Args:
-            timeout: HTTP request timeout in seconds (for did:web)
+            timeout: HTTP request timeout in seconds (for did:web, did:ion, did:ethr)
             cache_ttl: Cache time-to-live in seconds
-            rate_limit: Maximum requests per minute per domain (for did:web)
+            rate_limit: Maximum requests per minute per domain
+            ion_resolver: Base URL for ION resolver endpoint
+            ethr_resolver: Base URL for Ethereum DID resolver endpoint
         """
         self.timeout = timeout
         self.cache_ttl = cache_ttl
         self._cache: Dict[str, Tuple[bytes, float]] = {}  # (value, timestamp)
         self._rate_limits: Dict[str, List[float]] = {}  # domain -> list of request timestamps
         self._rate_limit_max = rate_limit
+        self.ion_resolver = ion_resolver
+        self.ethr_resolver = ethr_resolver
 
     def resolve_to_public_key(self, did: str, key_id: Optional[str] = None) -> bytes:
         """
@@ -138,6 +157,10 @@ class DIDResolver:
             public_key = self._resolve_did_key(did)
         elif method == 'web':
             public_key = self._resolve_did_web(did, key_id)
+        elif method == 'ion':
+            public_key = self._resolve_did_ion(did, key_id)
+        elif method == 'ethr':
+            public_key = self._resolve_did_ethr(did, key_id)
         else:
             raise ValidationError(f"Unsupported DID method: {method}")
 
@@ -358,6 +381,205 @@ class DIDResolver:
 
         # Extract public key from DID document
         return self._extract_public_key_from_document(did_document, key_id or "#keys-1")
+
+    def _resolve_did_ion(self, did: str, key_id: Optional[str] = None) -> bytes:
+        """
+        Resolve did:ion by querying an ION node
+
+        Format: did:ion:<unique-portion>
+        Example: did:ion:EiDahaOGH-liLLdDtTxEAdc8i-cfCz-WUcQdRJheMVNn3A
+
+        ION is a Sidetree-based DID method running on Bitcoin. Resolution is performed
+        by querying an ION node's REST API.
+
+        Args:
+            did: did:ion identifier
+            key_id: Optional key identifier (e.g., "#key-1")
+
+        Returns:
+            Ed25519 public key bytes
+
+        Raises:
+            ValidationError: If resolution fails or key extraction fails
+
+        Security:
+            - Uses HTTPS for resolution
+            - Enforces TLS certificate validation
+            - Validates Content-Type and response size
+            - Implements rate limiting
+        """
+        if not REQUESTS_AVAILABLE:
+            raise ValidationError("did:ion resolution requires 'requests' library")
+
+        if not did.startswith('did:ion:'):
+            raise ValidationError(f"Invalid did:ion format: {did}")
+
+        # Construct resolver URL
+        # ION resolvers typically expose identifiers at: {base_url}{did}
+        url = f"{self.ion_resolver}{did}"
+
+        # Extract domain from resolver URL for rate limiting
+        from urllib.parse import urlparse
+        parsed = urlparse(self.ion_resolver)
+        domain = parsed.netloc
+
+        # Security: Enforce rate limiting
+        self._check_rate_limit(domain)
+
+        # Fetch DID document from ION node
+        try:
+            response = requests.get(
+                url,
+                timeout=self.timeout,
+                verify=True,  # Enforce TLS certificate validation
+                allow_redirects=False,  # Prevent redirect-based SSRF
+                headers={
+                    'Accept': 'application/json',
+                    'User-Agent': 'GenesisGraph-DID-Resolver/0.2.0'
+                }
+            )
+            response.raise_for_status()
+
+            # Security: Validate Content-Type
+            content_type = response.headers.get('Content-Type', '')
+            if 'application/json' not in content_type and 'application/did+json' not in content_type:
+                raise ValidationError(
+                    f"Invalid content type from {url}: {content_type}. "
+                    f"Expected application/json or application/did+json"
+                )
+
+            # Security: Validate response size
+            if len(response.content) > MAX_RESPONSE_SIZE:
+                raise ValidationError(
+                    f"Response too large from {url}: {len(response.content)} bytes "
+                    f"(max {MAX_RESPONSE_SIZE})"
+                )
+
+            # ION resolver returns a resolution result with didDocument nested
+            response_data = response.json()
+
+            # Check for resolution result format (Universal Resolver style)
+            if 'didDocument' in response_data:
+                did_document = response_data['didDocument']
+            else:
+                # Direct DID document format
+                did_document = response_data
+
+        except requests.RequestException as e:
+            raise ValidationError(f"Failed to fetch did:ion document from {url}: {e}") from e
+        except json.JSONDecodeError as e:
+            raise ValidationError(f"Invalid JSON in did:ion document from {url}: {e}") from e
+
+        # Extract public key from DID document
+        # ION typically uses "#key-1" as the default key id
+        return self._extract_public_key_from_document(did_document, key_id or "#key-1")
+
+    def _resolve_did_ethr(self, did: str, key_id: Optional[str] = None) -> bytes:
+        """
+        Resolve did:ethr by querying an Ethereum resolver
+
+        Format: did:ethr:<address>
+                did:ethr:<chainId>:<address>
+
+        Examples:
+            - did:ethr:0xf3beac30c498d9e26865f34fcaa57dbb935b0d74
+            - did:ethr:0x5:0xf3beac30c498d9e26865f34fcaa57dbb935b0d74 (Goerli)
+
+        did:ethr uses the ethr-did-registry smart contract on Ethereum.
+        Resolution is performed via Universal Resolver or dedicated ethr resolver.
+
+        Args:
+            did: did:ethr identifier
+            key_id: Optional key identifier (e.g., "#controller")
+
+        Returns:
+            Ed25519 public key bytes (or secp256k1 if that's what's in the DID document)
+
+        Raises:
+            ValidationError: If resolution fails or key extraction fails
+
+        Security:
+            - Uses HTTPS for resolution
+            - Enforces TLS certificate validation
+            - Validates Content-Type and response size
+            - Implements rate limiting
+        """
+        if not REQUESTS_AVAILABLE:
+            raise ValidationError("did:ethr resolution requires 'requests' library")
+
+        if not did.startswith('did:ethr:'):
+            raise ValidationError(f"Invalid did:ethr format: {did}")
+
+        # Construct resolver URL
+        # Universal Resolver exposes identifiers at: {base_url}{did}
+        url = f"{self.ethr_resolver}{did}"
+
+        # Extract domain from resolver URL for rate limiting
+        from urllib.parse import urlparse
+        parsed = urlparse(self.ethr_resolver)
+        domain = parsed.netloc
+
+        # Security: Enforce rate limiting
+        self._check_rate_limit(domain)
+
+        # Fetch DID document from Ethereum resolver
+        try:
+            response = requests.get(
+                url,
+                timeout=self.timeout,
+                verify=True,  # Enforce TLS certificate validation
+                allow_redirects=False,  # Prevent redirect-based SSRF
+                headers={
+                    'Accept': 'application/json',
+                    'User-Agent': 'GenesisGraph-DID-Resolver/0.2.0'
+                }
+            )
+            response.raise_for_status()
+
+            # Security: Validate Content-Type
+            content_type = response.headers.get('Content-Type', '')
+            if 'application/json' not in content_type and 'application/did+json' not in content_type:
+                raise ValidationError(
+                    f"Invalid content type from {url}: {content_type}. "
+                    f"Expected application/json or application/did+json"
+                )
+
+            # Security: Validate response size
+            if len(response.content) > MAX_RESPONSE_SIZE:
+                raise ValidationError(
+                    f"Response too large from {url}: {len(response.content)} bytes "
+                    f"(max {MAX_RESPONSE_SIZE})"
+                )
+
+            # Universal Resolver returns a resolution result with didDocument nested
+            response_data = response.json()
+
+            # Check for resolution result format (Universal Resolver style)
+            if 'didDocument' in response_data:
+                did_document = response_data['didDocument']
+            else:
+                # Direct DID document format
+                did_document = response_data
+
+        except requests.RequestException as e:
+            raise ValidationError(f"Failed to fetch did:ethr document from {url}: {e}") from e
+        except json.JSONDecodeError as e:
+            raise ValidationError(f"Invalid JSON in did:ethr document from {url}: {e}") from e
+
+        # Extract public key from DID document
+        # did:ethr typically uses "#controller" or "#owner" as key identifiers
+        # If no key_id specified, try common defaults
+        if not key_id:
+            # Try common key IDs for did:ethr
+            for default_key_id in ["#controller", "#owner", "#key-1"]:
+                try:
+                    return self._extract_public_key_from_document(did_document, default_key_id)
+                except ValidationError:
+                    continue
+            # If no default worked, try with empty/first key
+            raise ValidationError(f"Could not find public key in did:ethr document with common key IDs")
+
+        return self._extract_public_key_from_document(did_document, key_id)
 
     def _extract_public_key_from_document(self, did_document: Dict, key_id: str) -> bytes:
         """
