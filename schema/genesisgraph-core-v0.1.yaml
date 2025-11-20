@@ -266,6 +266,89 @@ definitions:
         type: object
         description: "Acceptable variance for non-deterministic operations"
 
+  # SD-JWT selective disclosure
+  sd_jwt_attestation:
+    type: object
+    required: [sd_jwt, issuer]
+    properties:
+      sd_jwt:
+        type: string
+        description: "SD-JWT token (IETF draft-ietf-oauth-selective-disclosure-jwt)"
+      disclosures:
+        type: array
+        items:
+          type: object
+          properties:
+            claim_name:
+              type: string
+            claim_value: {}
+            salt:
+              type: string
+            hash:
+              type: string
+        description: "Selective disclosure objects"
+      issuer:
+        $ref: "#/definitions/did"
+      algorithm:
+        type: string
+        enum: [EdDSA, ES256, ES384, ES512, RS256]
+      holder_binding_required:
+        type: boolean
+
+  # Predicate proofs for privacy-preserving claims
+  predicate_proof:
+    type: object
+    required: [claim_name, predicate, threshold, satisfied, commitment]
+    properties:
+      claim_name:
+        type: string
+      predicate:
+        type: string
+        enum: [lt, lte, gt, gte, eq, neq, in_range, in_set]
+      threshold:
+        description: "Threshold value or range for comparison"
+      satisfied:
+        type: boolean
+      commitment:
+        type: string
+        description: "Cryptographic commitment to actual value"
+      disclosed:
+        type: boolean
+        description: "Whether actual value is disclosed"
+      value:
+        description: "Actual value (only if disclosed=true)"
+
+  # BBS+ selective disclosure
+  bbs_plus_attestation:
+    type: object
+    required: [proof, issuer]
+    properties:
+      proof:
+        type: object
+        required: [proof, revealed_messages, disclosed_indices, public_key]
+        properties:
+          proof:
+            type: string
+            description: "Hex-encoded BBS+ proof"
+          revealed_messages:
+            type: object
+            description: "Map of index to revealed message"
+          disclosed_indices:
+            type: array
+            items:
+              type: integer
+          public_key:
+            type: string
+          nonce:
+            type: string
+      issuer:
+        $ref: "#/definitions/did"
+      attribute_order:
+        type: array
+        items:
+          type: string
+        description: "Ordered list of attribute names"
+
   # Attestation
   attestation:
     type: object
@@ -273,7 +356,7 @@ definitions:
     properties:
       mode:
         type: string
-        enum: [basic, signed, verifiable, zk]
+        enum: [basic, signed, verifiable, zk, sd-jwt, bbs-plus, predicate]
       signer:
         $ref: "#/definitions/did"
       signature:
@@ -293,6 +376,14 @@ definitions:
         $ref: "#/definitions/tee_attestation"
       multisig:
         $ref: "#/definitions/multisig"
+      sd_jwt:
+        $ref: "#/definitions/sd_jwt_attestation"
+      bbs_plus:
+        $ref: "#/definitions/bbs_plus_attestation"
+      predicate_proofs:
+        type: array
+        items:
+          $ref: "#/definitions/predicate_proof"
     allOf:
       - if:
           properties:
@@ -307,6 +398,24 @@ definitions:
               enum: [signed, verifiable, zk]
         then:
           required: [signer, signature]
+      - if:
+          properties:
+            mode:
+              const: sd-jwt
+        then:
+          required: [sd_jwt]
+      - if:
+          properties:
+            mode:
+              const: bbs-plus
+        then:
+          required: [bbs_plus]
+      - if:
+          properties:
+            mode:
+              const: predicate
+        then:
+          required: [predicate_proofs]
 
   # Fidelity/loss tracking
   fidelity:

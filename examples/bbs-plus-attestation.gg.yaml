@@ -1,0 +1,119 @@
+# GenesisGraph BBS+ Unlinkable Selective Disclosure Example
+#
+# This example demonstrates using BBS+ signatures for unlinkable presentations.
+# Each presentation is cryptographically unlinkable to prevent tracking.
+#
+# Use case: Multiple verifications without correlation/tracking
+# Business value: Privacy-preserving multi-party verification
+
+spec_version: 0.1.0
+profile: gg-ai-basic-v1
+
+tools:
+  - id: claude
+    type: AIModel
+    vendor: Anthropic
+    version: claude-sonnet-4.5-20250929
+    identity:
+      did: did:web:api.anthropic.com
+
+entities:
+  - id: private_dataset
+    type: Dataset
+    version: "1.0"
+    file: data.json
+    hash: sha256:data_hash
+
+  - id: analysis_output
+    type: Dataset
+    version: "1.0"
+    file: analysis.json
+    hash: sha256:output_hash
+
+operations:
+  - id: privacy_preserving_analysis
+    type: analysis
+    inputs: [private_dataset@1.0]
+    outputs: [analysis_output@1.0]
+    tool: claude@claude-sonnet-4.5-20250929
+
+    # Parameters protected via BBS+ selective disclosure
+    parameters:
+      _redacted: true
+
+    # BBS+ attestation mode - enables unlinkable presentations
+    attestation:
+      mode: bbs-plus
+      timestamp: "2025-01-20T12:00:00Z"
+
+      # BBS+ presentation (unlinkable selective disclosure)
+      bbs_plus:
+        issuer: did:web:api.anthropic.com
+
+        # Zero-knowledge proof with selective attribute disclosure
+        proof:
+          # BBS+ proof (hex-encoded)
+          # This is a zero-knowledge proof of signature possession
+          # Each presentation generates a fresh, unlinkable proof
+          proof: "9a8b7c6d5e4f3a2b1c0d..."
+
+          # Revealed messages (selectively disclosed attributes)
+          # Key is attribute index, value is the disclosed value
+          revealed_messages:
+            "0": "claude-sonnet-4.5-20250929"  # Model always disclosed
+            "4": "sha256:output_hash"          # Output hash disclosed
+            # Indices 1, 2, 3 NOT disclosed (temperature, max_tokens, prompts)
+
+          # Indices of disclosed attributes
+          disclosed_indices: [0, 4]
+
+          # Issuer's public key for verification
+          public_key: "hex_encoded_bls12381_public_key"
+
+          # Presentation nonce (for freshness/challenge-response)
+          nonce: "hex_encoded_random_nonce"
+
+        # Ordered list of attribute names (for index mapping)
+        attribute_order:
+          - model                 # Index 0 - DISCLOSED
+          - temperature           # Index 1 - NOT disclosed
+          - max_tokens            # Index 2 - NOT disclosed
+          - system_prompt_hash    # Index 3 - NOT disclosed
+          - output_hash           # Index 4 - DISCLOSED
+
+metadata:
+  description: "AI analysis with BBS+ unlinkable selective disclosure"
+  unlinkability: true
+  presentation_count: 1  # This is presentation #1
+  use_case: |
+    Same credential can create multiple unlinkable presentations:
+
+    Presentation 1 (Public):
+    - Disclosed: model, output_hash
+    - Hidden: temperature, max_tokens, prompts
+
+    Presentation 2 (Auditor):
+    - Disclosed: model, temperature, max_tokens, output_hash
+    - Hidden: prompts
+
+    Presentation 3 (Regulator):
+    - Disclosed: model, output_hash
+    - Hidden: temperature, max_tokens, prompts
+
+    Key properties:
+    1. Each presentation is UNLINKABLE (cannot correlate)
+    2. Different verifiers see different attributes
+    3. No verifier can track the credential holder
+    4. Same underlying BBS+ signature for all presentations
+
+  privacy_benefits:
+    - anti_correlation: "Presentations cannot be linked across verifiers"
+    - minimal_disclosure: "Each verifier only sees necessary attributes"
+    - holder_privacy: "Credential holder cannot be tracked"
+
+  comparison_with_sd_jwt: |
+    SD-JWT: Same signature disclosed to all verifiers (linkable)
+    BBS+:   Fresh zero-knowledge proof per presentation (unlinkable)
+
+    Use SD-JWT when: OAuth/OIDC integration, rapid deployment
+    Use BBS+ when:   Privacy-critical, anti-correlation required

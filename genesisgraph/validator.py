@@ -39,6 +39,14 @@ try:
 except ImportError:
     TRANSPARENCY_LOG_AVAILABLE = False
 
+try:
+    from .credentials.sd_jwt import SDJWTVerifier, SDJWTError
+    from .credentials.predicates import verify_predicate, PredicateProof
+    from .credentials.bbs_plus import BBSPlusVerifier
+    SD_JWT_AVAILABLE = True
+except ImportError:
+    SD_JWT_AVAILABLE = False
+
 from .errors import SchemaError, ValidationError
 
 # Security: Input size limits to prevent DoS
@@ -378,7 +386,7 @@ class GenesisGraphValidator:
             return errors
 
         mode = attestation.get('mode', 'basic')
-        valid_modes = ['basic', 'signed', 'verifiable', 'zk']
+        valid_modes = ['basic', 'signed', 'verifiable', 'zk', 'sd-jwt', 'bbs-plus', 'predicate']
         if mode not in valid_modes:
             errors.append(f"{context}: invalid attestation mode: {mode}")
 
@@ -407,6 +415,36 @@ class GenesisGraphValidator:
                         # In production, you'd look up keys from a key store or DID registry
                         sig_errors = self._verify_signature(attestation, operation_data, context)
                         errors.extend(sig_errors)
+
+        # SD-JWT mode validation
+        elif mode == 'sd-jwt':
+            if 'sd_jwt' not in attestation:
+                errors.append(f"{context}: attestation mode 'sd-jwt' requires 'sd_jwt' field")
+            elif self.verify_signatures and SD_JWT_AVAILABLE:
+                sd_jwt_errors = self._verify_sd_jwt_attestation(attestation, context)
+                errors.extend(sd_jwt_errors)
+            elif self.verify_signatures and not SD_JWT_AVAILABLE:
+                errors.append(f"{context}: SD-JWT verification requested but credentials module not available. Install with: pip install genesisgraph[credentials]")
+
+        # BBS+ mode validation
+        elif mode == 'bbs-plus':
+            if 'bbs_plus' not in attestation:
+                errors.append(f"{context}: attestation mode 'bbs-plus' requires 'bbs_plus' field")
+            elif self.verify_signatures and SD_JWT_AVAILABLE:
+                bbs_errors = self._verify_bbs_plus_attestation(attestation, context)
+                errors.extend(bbs_errors)
+            elif self.verify_signatures and not SD_JWT_AVAILABLE:
+                errors.append(f"{context}: BBS+ verification requested but credentials module not available. Install with: pip install genesisgraph[credentials]")
+
+        # Predicate mode validation
+        elif mode == 'predicate':
+            if 'predicate_proofs' not in attestation:
+                errors.append(f"{context}: attestation mode 'predicate' requires 'predicate_proofs' field")
+            elif self.verify_signatures and SD_JWT_AVAILABLE:
+                predicate_errors = self._verify_predicate_attestation(attestation, context)
+                errors.extend(predicate_errors)
+            elif self.verify_signatures and not SD_JWT_AVAILABLE:
+                errors.append(f"{context}: Predicate verification requested but credentials module not available. Install with: pip install genesisgraph[credentials]")
 
         # Verify transparency log anchoring if present and enabled
         if 'transparency' in attestation and self.verify_transparency:
@@ -528,6 +566,128 @@ class GenesisGraphValidator:
             errors.append(f"{context}: {algo} signature verification not yet implemented")
         else:
             errors.append(f"{context}: unsupported signature algorithm: {algo}")
+
+        return errors
+
+    def _verify_sd_jwt_attestation(self, attestation: Dict, context: str) -> List[str]:
+        """
+        Verify SD-JWT selective disclosure attestation
+
+        Args:
+            attestation: Attestation block with SD-JWT
+            context: Context string for error messages
+
+        Returns:
+            List of error messages (empty if valid)
+        """
+        errors = []
+
+        if not SD_JWT_AVAILABLE:
+            errors.append(f"{context}: SD-JWT verification requires credentials module")
+            return errors
+
+        sd_jwt_data = attestation.get('sd_jwt', {})
+
+        # Create verifier
+        # In production, you'd provide trusted issuers from configuration
+        verifier = SDJWTVerifier()
+
+        try:
+            # Verify SD-JWT
+            result = verifier.verify_sd_jwt(sd_jwt_data)
+
+            if not result.get('valid', False):
+                verification_errors = result.get('errors', ['Unknown verification error'])
+                for err in verification_errors:
+                    errors.append(f"{context}: SD-JWT verification failed: {err}")
+
+        except Exception as e:
+            errors.append(f"{context}: SD-JWT verification error: {e}")
+
+        return errors
+
+    def _verify_bbs_plus_attestation(self, attestation: Dict, context: str) -> List[str]:
+        """
+        Verify BBS+ selective disclosure attestation
+
+        Args:
+            attestation: Attestation block with BBS+ proof
+            context: Context string for error messages
+
+        Returns:
+            List of error messages (empty if valid)
+        """
+        errors = []
+
+        if not SD_JWT_AVAILABLE:
+            errors.append(f"{context}: BBS+ verification requires credentials module")
+            return errors
+
+        bbs_plus_data = attestation.get('bbs_plus', {})
+
+        # Create verifier
+        verifier = BBSPlusVerifier()
+
+        try:
+            # Extract presentation data
+            presentation = {
+                "type": "BBSPlusPresentation",
+                "issuer": bbs_plus_data.get('issuer'),
+                "proof": bbs_plus_data.get('proof', {}),
+                "attribute_order": bbs_plus_data.get('attribute_order', [])
+            }
+
+            # Verify presentation
+            result = verifier.verify_presentation(presentation)
+
+            if not result.get('valid', False):
+                verification_errors = result.get('errors', ['Unknown verification error'])
+                for err in verification_errors:
+                    errors.append(f"{context}: BBS+ verification failed: {err}")
+
+        except Exception as e:
+            errors.append(f"{context}: BBS+ verification error: {e}")
+
+        return errors
+
+    def _verify_predicate_attestation(self, attestation: Dict, context: str) -> List[str]:
+        """
+        Verify predicate proofs for privacy-preserving claims
+
+        Args:
+            attestation: Attestation block with predicate proofs
+            context: Context string for error messages
+
+        Returns:
+            List of error messages (empty if valid)
+        """
+        errors = []
+
+        if not SD_JWT_AVAILABLE:
+            errors.append(f"{context}: Predicate verification requires credentials module")
+            return errors
+
+        predicate_proofs = attestation.get('predicate_proofs', [])
+
+        if not isinstance(predicate_proofs, list):
+            errors.append(f"{context}: predicate_proofs must be a list")
+            return errors
+
+        for idx, proof_data in enumerate(predicate_proofs):
+            try:
+                # Convert dict to PredicateProof
+                proof = PredicateProof.from_dict(proof_data)
+
+                # Verify predicate
+                result = verify_predicate(proof)
+
+                if not result.get('valid', False):
+                    verification_errors = result.get('errors', [])
+                    for err in verification_errors:
+                        errors.append(f"{context}: Predicate proof {idx} failed: {err}")
+
+            except Exception as e:
+                errors.append(f"{context}: Predicate proof {idx} verification error: {e}")
 
         return errors
 
