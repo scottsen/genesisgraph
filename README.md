@@ -176,6 +176,48 @@ See **[docs/PROFILE_VALIDATORS.md](docs/PROFILE_VALIDATORS.md)** for complete do
 
 ---
 
+## Cryptographic Privacy Features
+
+GenesisGraph now supports **SD-JWT and BBS+ selective disclosure** for advanced privacy-preserving provenance:
+
+### SD-JWT (Selective Disclosure JWT)
+
+Implements IETF SD-JWT draft specification for cryptographically hiding claim values while maintaining verifiability:
+
+- **Selective claim disclosure**: Reveal only necessary information to verifiers
+- **Holder binding**: Prevent credential replay attacks
+- **Standard-compliant**: Follows IETF draft specification
+- **Integration**: Works seamlessly with GenesisGraph attestations
+
+### BBS+ Signatures
+
+Privacy-preserving credentials with unlinkable selective disclosure:
+
+- **Zero-knowledge proofs**: Prove properties without revealing values
+- **Unlinkable presentations**: Each disclosure is cryptographically unlinkable
+- **Predicate proofs**: Range proofs (e.g., "age > 21" without revealing exact age)
+- **Pairing-based cryptography**: Industry-standard BBS+ implementation
+
+### Usage
+
+```python
+from genesisgraph.credentials.sd_jwt import SDJWTIssuer, SDJWTVerifier
+from genesisgraph.credentials.bbs_plus import BBSPlusIssuer
+
+# Create SD-JWT with selective disclosure
+issuer = SDJWTIssuer(issuer_did="did:web:example.com")
+sd_jwt = issuer.create_sd_jwt(
+    claims={"temperature": 0.7, "model": "gpt-4"},
+    disclosable_claims=["temperature"]  # Hide model, reveal temperature
+)
+```
+
+See **[docs/SELECTIVE_DISCLOSURE.md](docs/SELECTIVE_DISCLOSURE.md)** for complete documentation and examples.
+
+**Note:** Requires optional `credentials` dependencies: `pip install genesisgraph[credentials]`
+
+---
+
 ## What's New: Selective Disclosure Patterns
 
 The updated specification (§9.2) defines three practical patterns for privacy-preserving provenance:
@@ -499,12 +541,12 @@ This package represents the **v0.2** deliverables for selective disclosure:
 - [x] Full documentation in `docs/TRANSPARENCY_LOG.md`
 - [x] Enterprise-ready for regulated industries (AS9100D, ISO 9001:2015, FDA 21 CFR Part 11)
 
-**Next steps (v0.3):**
-- [ ] SD-JWT / BBS+ selective disclosure (cryptographic privacy)
-- [ ] ZK proof-of-policy templates (zero-knowledge compliance)
-- [ ] Profile-specific validators (gg-ai-basic-v1, gg-cam-v1)
-- [ ] Additional DID methods (did:ion, did:ethr)
-- [ ] Python/JavaScript SDK libraries
+**v0.3 Features:**
+- [x] SD-JWT / BBS+ selective disclosure (cryptographic privacy) — ✅ **Completed**
+- [x] Profile-specific validators (gg-ai-basic-v1, gg-cam-v1) — ✅ **Completed**
+- [x] Python/JavaScript SDK libraries — ✅ **Completed**
+- [ ] ZK proof-of-policy templates (zero-knowledge compliance) — *In progress*
+- [ ] Additional DID methods (did:ion, did:ethr) — *In progress*
 
 ## Comparison Matrix: Verification Strengths
 
