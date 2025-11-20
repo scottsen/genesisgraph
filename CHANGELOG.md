@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- TiaCAD integration references from all documentation (closed #15)
+  - Removed TiaCAD section from USE_CASES.md
+  - Removed TiaCAD examples from README.md, QUICKSTART.md, FAQ.md
+  - Removed TiaCAD reference implementation from MAIN_SPEC.md
+  - Rationale: TiaCAD scope too small compared to GenesisGraph's broader vision
+
 ---
 
 ## [0.2.0] - 2025-11-19
