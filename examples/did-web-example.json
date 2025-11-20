@@ -1,0 +1,34 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/ed25519-2020/v1"
+  ],
+  "id": "did:web:example.com",
+  "verificationMethod": [
+    {
+      "id": "did:web:example.com#keys-1",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:web:example.com",
+      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
+    },
+    {
+      "id": "did:web:example.com#signing-key",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:web:example.com",
+      "publicKeyBase58": "2rXotp9RZQxbP1HWUR4fy2qNADBJcKJRGH3VyGYGXMaN"
+    }
+  ],
+  "authentication": [
+    "did:web:example.com#keys-1"
+  ],
+  "assertionMethod": [
+    "did:web:example.com#signing-key"
+  ],
+  "service": [
+    {
+      "id": "did:web:example.com#provenance-api",
+      "type": "GenesisGraphAPI",
+      "serviceEndpoint": "https://api.example.com/provenance/v1"
+    }
+  ]
+}

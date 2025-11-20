@@ -1,0 +1,56 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/ed25519-2020/v1"
+  ],
+  "id": "did:web:aerospace.example.com",
+  "verificationMethod": [
+    {
+      "id": "did:web:aerospace.example.com#corporate-signing-key",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:web:aerospace.example.com",
+      "publicKeyBase58": "DgKmQ4jN8YVT2rQQPhXC9mL8wXvJp9sH2K3nBfRzYxPq",
+      "description": "Corporate signing key for official documentation"
+    },
+    {
+      "id": "did:web:aerospace.example.com#qc-verification-key",
+      "type": "Ed25519VerificationKey2020",
+      "controller": "did:web:aerospace.example.com",
+      "publicKeyBase58": "8jKpVwLmN2rQxS5tYzBfHdGqWcPvJnM9kLpXzRyTqWs3",
+      "description": "Quality control verification key"
+    },
+    {
+      "id": "did:web:aerospace.example.com#compliance-key",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:aerospace.example.com",
+      "publicKeyJwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+      },
+      "description": "AS9100D compliance signing key"
+    }
+  ],
+  "authentication": [
+    "did:web:aerospace.example.com#corporate-signing-key"
+  ],
+  "assertionMethod": [
+    "did:web:aerospace.example.com#qc-verification-key",
+    "did:web:aerospace.example.com#compliance-key"
+  ],
+  "capabilityDelegation": [
+    "did:web:aerospace.example.com#corporate-signing-key"
+  ],
+  "service": [
+    {
+      "id": "did:web:aerospace.example.com#provenance-api",
+      "type": "GenesisGraphAPI",
+      "serviceEndpoint": "https://api.aerospace.example.com/provenance/v1"
+    },
+    {
+      "id": "did:web:aerospace.example.com#compliance-portal",
+      "type": "CompliancePortal",
+      "serviceEndpoint": "https://compliance.aerospace.example.com"
+    }
+  ]
+}
