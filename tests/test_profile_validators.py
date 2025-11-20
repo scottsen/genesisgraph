@@ -221,6 +221,12 @@ class TestCAMv1Validator:
                         'inspection_type': 'dimensional',
                         'acceptance_criteria': 'ISO-9001',
                         'measurement_uncertainty_mm': 0.01
+                    },
+                    'attestation': {
+                        'mode': 'signed',
+                        'signer': 'did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK',
+                        'signature': 'mockbase64signature==',
+                        'timestamp': '2024-01-15T10:00:00Z'
                     }
                 }
             ],
