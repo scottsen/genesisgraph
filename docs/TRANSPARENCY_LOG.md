@@ -2,7 +2,7 @@
 
 ## Overview
 
-GenesisGraph now includes **production-ready Certificate Transparency (RFC 6962) verification** with support for **Trillian** and **Rekor (Sigstore)** transparency logs. This feature makes GenesisGraph enterprise-ready for aerospace, manufacturing, and other high-security industries that require tamper-evident audit trails.
+GenesisGraph now includes **production-ready Certificate Transparency (RFC 6962) verification** with support for **Trillian** and **Rekor (Sigstore)** transparency logs. This feature makes GenesisGraph enterprise-ready for aerospace, manufacturing, healthcare, and other high-security industries that require tamper-evident audit trails.
 
 ## Why Transparency Logs?
 
