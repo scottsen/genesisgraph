@@ -21,28 +21,10 @@ from genesisgraph.validator import GenesisGraphValidator
 class TestDIDWebIntegration:
     """Integration tests for did:web resolution"""
 
-    def test_resolve_did_web_with_base58_key(self):
+    def test_resolve_did_web_with_base58_key(self, mock_http_response, base58_encode):
         """Test successful did:web resolution with publicKeyBase58"""
         # Ed25519 public key (32 bytes)
         test_public_key = b'\x12\x34\x56\x78' * 8  # 32 bytes
-
-        # Base58 encode the key
-        def base58_encode(data):
-            ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-            num = int.from_bytes(data, 'big')
-            if num == 0:
-                return '1' * len(data)
-            result = ''
-            while num > 0:
-                num, remainder = divmod(num, 58)
-                result = ALPHABET[remainder] + result
-            # Add leading '1's for leading zero bytes
-            for byte in data:
-                if byte == 0:
-                    result = '1' + result
-                else:
-                    break
-            return result
 
         key_base58 = base58_encode(test_public_key)
 
@@ -58,12 +40,7 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             resolver = DIDResolver()
             public_key = resolver.resolve_to_public_key('did:web:example.com')
@@ -76,23 +53,9 @@ class TestDIDWebIntegration:
             assert kwargs['verify'] is True
             assert kwargs['allow_redirects'] is False
 
-    def test_resolve_did_web_with_multibase_key(self):
+    def test_resolve_did_web_with_multibase_key(self, mock_http_response, base58_encode):
         """Test did:web resolution with publicKeyMultibase"""
         test_public_key = b'\xab\xcd\xef\x01' * 8  # 32 bytes
-
-        def base58_encode(data):
-            ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-            num = int.from_bytes(data, 'big')
-            result = ''
-            while num > 0:
-                num, remainder = divmod(num, 58)
-                result = ALPHABET[remainder] + result
-            for byte in data:
-                if byte == 0:
-                    result = '1' + result
-                else:
-                    break
-            return result
 
         key_multibase = 'z' + base58_encode(test_public_key)
 
@@ -107,19 +70,17 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/did+json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(
+                content_type='application/did+json',
+                json_data=did_document
+            )
 
             resolver = DIDResolver()
             public_key = resolver.resolve_to_public_key('did:web:example.com', '#keys-1')
 
             assert public_key == test_public_key
 
-    def test_resolve_did_web_with_jwk(self):
+    def test_resolve_did_web_with_jwk(self, mock_http_response):
         """Test did:web resolution with publicKeyJwk (JSON Web Key)"""
         test_public_key = b'\xff\xee\xdd\xcc' * 8  # 32 bytes
 
@@ -141,12 +102,7 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             resolver = DIDResolver()
             public_key = resolver.resolve_to_public_key(
@@ -156,23 +112,9 @@ class TestDIDWebIntegration:
 
             assert public_key == test_public_key
 
-    def test_resolve_did_web_with_path(self):
+    def test_resolve_did_web_with_path(self, mock_http_response, base58_encode):
         """Test did:web with path components: did:web:example.com:user:alice"""
         test_public_key = b'\x11\x22\x33\x44' * 8
-
-        def base58_encode(data):
-            ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-            num = int.from_bytes(data, 'big')
-            result = ''
-            while num > 0:
-                num, remainder = divmod(num, 58)
-                result = ALPHABET[remainder] + result
-            for byte in data:
-                if byte == 0:
-                    result = '1' + result
-                else:
-                    break
-            return result
 
         did_document = {
             "id": "did:web:example.com:user:alice",
@@ -185,12 +127,7 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             resolver = DIDResolver()
             public_key = resolver.resolve_to_public_key('did:web:example.com:user:alice')
@@ -201,7 +138,7 @@ class TestDIDWebIntegration:
             args, _ = mock_get.call_args
             assert args[0] == 'https://example.com/user/alice/did.json'
 
-    def test_end_to_end_signature_verification_with_did_web(self):
+    def test_end_to_end_signature_verification_with_did_web(self, mock_http_response, base58_encode):
         """Test complete signature verification flow using did:web"""
         # This is a more complete integration test that verifies the entire chain:
         # did:web resolution -> public key extraction -> signature verification
@@ -209,20 +146,6 @@ class TestDIDWebIntegration:
         # Generate a test Ed25519 key pair (in practice, use ed25519 library)
         # For this test, we'll mock the verification
         test_public_key = b'\xaa\xbb\xcc\xdd' * 8
-
-        def base58_encode(data):
-            ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-            num = int.from_bytes(data, 'big')
-            result = ''
-            while num > 0:
-                num, remainder = divmod(num, 58)
-                result = ALPHABET[remainder] + result
-            for byte in data:
-                if byte == 0:
-                    result = '1' + result
-                else:
-                    break
-            return result
 
         did_document = {
             "id": "did:web:hospital.example.com",
@@ -236,12 +159,7 @@ class TestDIDWebIntegration:
 
         # Mock the HTTP request for DID document
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             # Mock ed25519 verification
             with patch('genesisgraph.validator.ed25519') as mock_ed25519:
@@ -273,24 +191,10 @@ class TestDIDWebIntegration:
                 # Verify ed25519 verification was attempted with correct key
                 mock_ed25519.VerifyingKey.from_bytes.assert_called_once_with(test_public_key)
 
-    def test_multiple_verification_methods(self):
+    def test_multiple_verification_methods(self, mock_http_response, base58_encode):
         """Test DID document with multiple keys, selecting specific one"""
         key1 = b'\x11' * 32
         key2 = b'\x22' * 32
-
-        def base58_encode(data):
-            ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-            num = int.from_bytes(data, 'big')
-            result = ''
-            while num > 0:
-                num, remainder = divmod(num, 58)
-                result = ALPHABET[remainder] + result
-            for byte in data:
-                if byte == 0:
-                    result = '1' + result
-                else:
-                    break
-            return result
 
         did_document = {
             "id": "did:web:multi.example.com",
@@ -311,12 +215,7 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             resolver = DIDResolver()
 
@@ -328,23 +227,9 @@ class TestDIDWebIntegration:
 
             assert public_key == key2  # Should get key2, not key1
 
-    def test_caching_works_for_did_web(self):
+    def test_caching_works_for_did_web(self, mock_http_response, base58_encode):
         """Test that did:web results are cached to reduce network calls"""
         test_public_key = b'\x99' * 32
-
-        def base58_encode(data):
-            ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-            num = int.from_bytes(data, 'big')
-            result = ''
-            while num > 0:
-                num, remainder = divmod(num, 58)
-                result = ALPHABET[remainder] + result
-            for byte in data:
-                if byte == 0:
-                    result = '1' + result
-                else:
-                    break
-            return result
 
         did_document = {
             "id": "did:web:cached.example.com",
@@ -357,12 +242,7 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             resolver = DIDResolver(cache_ttl=300)
 
@@ -376,7 +256,7 @@ class TestDIDWebIntegration:
             assert public_key2 == test_public_key
             assert mock_get.call_count == 1  # Still only 1 call
 
-    def test_invalid_key_type_rejected(self):
+    def test_invalid_key_type_rejected(self, mock_http_response):
         """Test that non-Ed25519 keys are rejected"""
         did_document = {
             "id": "did:web:example.com",
@@ -389,12 +269,7 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             resolver = DIDResolver()
 
@@ -403,7 +278,7 @@ class TestDIDWebIntegration:
 
             assert 'Unsupported key type' in str(exc.value)
 
-    def test_key_not_found(self):
+    def test_key_not_found(self, mock_http_response):
         """Test error when requested key ID doesn't exist"""
         did_document = {
             "id": "did:web:example.com",
@@ -416,12 +291,7 @@ class TestDIDWebIntegration:
         }
 
         with patch('genesisgraph.did_resolver.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.status_code = 200
-            mock_response.headers = {'Content-Type': 'application/json'}
-            mock_response.content = json.dumps(did_document).encode()
-            mock_response.json.return_value = did_document
-            mock_get.return_value = mock_response
+            mock_get.return_value = mock_http_response(json_data=did_document)
 
             resolver = DIDResolver()
 

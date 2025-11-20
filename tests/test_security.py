@@ -229,15 +229,12 @@ class TestRateLimiting:
     """Test rate limiting in DID resolver"""
 
     @patch('genesisgraph.did_resolver.requests.get')
-    def test_rate_limit_enforced(self, mock_get):
+    def test_rate_limit_enforced(self, mock_get, mock_http_response):
         """Test that rate limiting is enforced"""
         # Mock successful response
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.headers = {'Content-Type': 'application/json'}
-        mock_response.content = b'{"verificationMethod": []}'
-        mock_response.json.return_value = {"verificationMethod": []}
-        mock_get.return_value = mock_response
+        mock_get.return_value = mock_http_response(
+            json_data={"verificationMethod": []}
+        )
 
         resolver = DIDResolver(rate_limit=5)
 
@@ -382,13 +379,12 @@ class TestContentTypeValidation:
     """Test Content-Type validation for DID web resolution"""
 
     @patch('genesisgraph.did_resolver.requests.get')
-    def test_invalid_content_type_rejected(self, mock_get):
+    def test_invalid_content_type_rejected(self, mock_get, mock_http_response):
         """Test that non-JSON content types are rejected"""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.headers = {'Content-Type': 'text/html'}
-        mock_response.content = b'<html>Not JSON</html>'
-        mock_get.return_value = mock_response
+        mock_get.return_value = mock_http_response(
+            content_type='text/html',
+            content=b'<html>Not JSON</html>'
+        )
 
         resolver = DIDResolver()
 
@@ -398,14 +394,11 @@ class TestContentTypeValidation:
         assert 'content type' in str(exc_info.value).lower()
 
     @patch('genesisgraph.did_resolver.requests.get')
-    def test_valid_content_type_accepted(self, mock_get):
+    def test_valid_content_type_accepted(self, mock_get, mock_http_response):
         """Test that valid JSON content types are accepted"""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.headers = {'Content-Type': 'application/json'}
-        mock_response.content = b'{"verificationMethod": []}'
-        mock_response.json.return_value = {"verificationMethod": []}
-        mock_get.return_value = mock_response
+        mock_get.return_value = mock_http_response(
+            json_data={"verificationMethod": []}
+        )
 
         resolver = DIDResolver()
 
@@ -417,15 +410,13 @@ class TestContentTypeValidation:
         assert 'content type' not in str(exc_info.value).lower()
 
     @patch('genesisgraph.did_resolver.requests.get')
-    def test_response_size_limit_enforced(self, mock_get):
+    def test_response_size_limit_enforced(self, mock_get, mock_http_response):
         """Test that overly large responses are rejected"""
         from genesisgraph.did_resolver import MAX_RESPONSE_SIZE
 
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.headers = {'Content-Type': 'application/json'}
-        mock_response.content = b'x' * (MAX_RESPONSE_SIZE + 1)
-        mock_get.return_value = mock_response
+        mock_get.return_value = mock_http_response(
+            content=b'x' * (MAX_RESPONSE_SIZE + 1)
+        )
 
         resolver = DIDResolver()
 
@@ -439,14 +430,11 @@ class TestTLSValidation:
     """Test TLS certificate validation"""
 
     @patch('genesisgraph.did_resolver.requests.get')
-    def test_verify_tls_enabled(self, mock_get):
+    def test_verify_tls_enabled(self, mock_get, mock_http_response):
         """Test that TLS verification is enabled"""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.headers = {'Content-Type': 'application/json'}
-        mock_response.content = b'{"verificationMethod": []}'
-        mock_response.json.return_value = {"verificationMethod": []}
-        mock_get.return_value = mock_response
+        mock_get.return_value = mock_http_response(
+            json_data={"verificationMethod": []}
+        )
 
         resolver = DIDResolver()
 
@@ -461,14 +449,11 @@ class TestTLSValidation:
         assert call_kwargs.get('verify') is True
 
     @patch('genesisgraph.did_resolver.requests.get')
-    def test_redirects_disabled(self, mock_get):
+    def test_redirects_disabled(self, mock_get, mock_http_response):
         """Test that redirects are disabled"""
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.headers = {'Content-Type': 'application/json'}
-        mock_response.content = b'{"verificationMethod": []}'
-        mock_response.json.return_value = {"verificationMethod": []}
-        mock_get.return_value = mock_response
+        mock_get.return_value = mock_http_response(
+            json_data={"verificationMethod": []}
+        )
 
         resolver = DIDResolver()
 

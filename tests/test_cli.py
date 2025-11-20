@@ -16,57 +16,6 @@ from genesisgraph.cli import CLICK_AVAILABLE
 class TestClickCLI:
     """Test Click-based CLI commands"""
 
-    @pytest.fixture
-    def valid_gg_file(self):
-        """Create a temporary valid GenesisGraph file"""
-        data = {
-            'spec_version': '0.1.0',
-            'tools': [],
-            'entities': [],
-            'operations': []
-        }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.gg.yaml', delete=False) as f:
-            yaml.dump(data, f)
-            yield f.name
-        os.unlink(f.name)
-
-    @pytest.fixture
-    def invalid_gg_file(self):
-        """Create a temporary invalid GenesisGraph file"""
-        data = {
-            # Missing spec_version
-            'tools': [],
-            'entities': [],
-            'operations': []
-        }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.gg.yaml', delete=False) as f:
-            yaml.dump(data, f)
-            yield f.name
-        os.unlink(f.name)
-
-    @pytest.fixture
-    def info_gg_file(self):
-        """Create a GenesisGraph file with content for info command"""
-        data = {
-            'spec_version': '0.1.0',
-            'profile': 'gg-ai-basic-v1',
-            'tools': [
-                {'id': 'python', 'type': 'Software', 'version': '3.11'},
-                {'id': 'pytorch', 'type': 'Software', 'version': '2.0'}
-            ],
-            'entities': [
-                {'id': 'data1', 'type': 'Dataset', 'version': '1.0', 'file': 'test.txt'}
-            ],
-            'operations': [
-                {'id': 'op1', 'type': 'transformation', 'inputs': ['a@1'], 'outputs': ['b@1']},
-                {'id': 'op2', 'type': 'inference', 'inputs': ['b@1'], 'outputs': ['c@1']}
-            ]
-        }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.gg.yaml', delete=False) as f:
-            yaml.dump(data, f)
-            yield f.name
-        os.unlink(f.name)
-
     @pytest.mark.skipif(not CLICK_AVAILABLE, reason="Click not available")
     def test_validate_command_success(self, valid_gg_file):
         """Test validate command with valid file"""
@@ -243,55 +192,6 @@ class TestClickCLI:
 
 class TestFallbackCLI:
     """Test fallback CLI without Click"""
-
-    @pytest.fixture
-    def valid_gg_file(self):
-        """Create a temporary valid GenesisGraph file"""
-        data = {
-            'spec_version': '0.1.0',
-            'tools': [],
-            'entities': [],
-            'operations': []
-        }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.gg.yaml', delete=False) as f:
-            yaml.dump(data, f)
-            yield f.name
-        os.unlink(f.name)
-
-    @pytest.fixture
-    def invalid_gg_file(self):
-        """Create a temporary invalid GenesisGraph file"""
-        data = {
-            # Missing spec_version
-            'tools': [],
-            'entities': [],
-            'operations': []
-        }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.gg.yaml', delete=False) as f:
-            yaml.dump(data, f)
-            yield f.name
-        os.unlink(f.name)
-
-    @pytest.fixture
-    def info_gg_file(self):
-        """Create a GenesisGraph file with content for info command"""
-        data = {
-            'spec_version': '0.1.0',
-            'profile': 'gg-ai-basic-v1',
-            'tools': [
-                {'id': 'python', 'type': 'Software', 'version': '3.11'}
-            ],
-            'entities': [
-                {'id': 'data1', 'type': 'Dataset', 'version': '1.0', 'file': 'test.txt'}
-            ],
-            'operations': [
-                {'id': 'op1', 'type': 'transformation', 'inputs': ['a@1'], 'outputs': ['b@1']}
-            ]
-        }
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.gg.yaml', delete=False) as f:
-            yaml.dump(data, f)
-            yield f.name
-        os.unlink(f.name)
 
     def test_fallback_validate_success(self, valid_gg_file, capsys):
         """Test fallback validate with valid file"""
