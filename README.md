@@ -41,6 +41,70 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 
 ---
 
+## 📚 SDK Libraries
+
+GenesisGraph provides official SDKs for easy integration:
+
+### Python SDK
+
+```bash
+pip install genesisgraph
+```
+
+```python
+from genesisgraph import GenesisGraph, Entity, Operation, Tool
+
+# Create a document
+gg = GenesisGraph(spec_version="0.1.0")
+
+# Add a tool
+tool = Tool(id="mytool", type="Software", version="1.0")
+gg.add_tool(tool)
+
+# Add entities and operations
+entity = Entity(id="data", type="Dataset", version="1", file="./data.csv")
+gg.add_entity(entity)
+
+# Export
+yaml_output = gg.to_yaml()
+gg.save_yaml("workflow.gg.yaml")
+```
+
+**Features:** Full builder API, validation, DID resolution, signature verification, transparency log integration
+
+**Docs:** See [examples/python_sdk_quickstart.py](examples/python_sdk_quickstart.py)
+
+### JavaScript/TypeScript SDK
+
+```bash
+npm install @genesisgraph/sdk
+```
+
+```typescript
+import { GenesisGraph, Entity, Operation, Tool } from '@genesisgraph/sdk';
+
+// Create a document
+const gg = new GenesisGraph({ specVersion: '0.1.0' });
+
+// Add a tool
+const tool = new Tool({ id: 'mytool', type: 'Software', version: '1.0' });
+gg.addTool(tool);
+
+// Add entities and operations
+const entity = new Entity({ id: 'data', type: 'Dataset', version: '1', file: './data.csv' });
+gg.addEntity(entity);
+
+// Export
+const yaml = gg.toYAML();
+gg.saveYAML('workflow.gg.yaml');
+```
+
+**Features:** Full TypeScript support, fluent API, YAML/JSON conversion, hash computation
+
+**Docs:** See [sdks/javascript/README.md](sdks/javascript/README.md) and [sdks/javascript/examples/quickstart.ts](sdks/javascript/examples/quickstart.ts)
+
+---
+
 ## 📦 What's Included
 
 This package contains the complete v0.2 implementation:
