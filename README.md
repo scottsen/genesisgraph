@@ -34,6 +34,7 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 3. **[FAQ.md](FAQ.md)** - Common questions: "Why not PROV-O?", "Do I need blockchain?", etc.
 4. **[spec/MAIN_SPEC.md](spec/MAIN_SPEC.md)** - Complete specification (886 lines)
 5. **[STRATEGIC_CONTEXT.md](STRATEGIC_CONTEXT.md)** - Why this matters, adoption strategy, 5-year vision
+6. **[CRITICAL_GAPS_ANALYSIS.md](CRITICAL_GAPS_ANALYSIS.md)** - Strategic roadmap for v1.0, missing layers, improvements
 
 **Enterprise users:** See **[docs/DID_WEB_GUIDE.md](docs/DID_WEB_GUIDE.md)** for did:web support - use your organization's domain for identity management.
 
@@ -625,6 +626,7 @@ client.export_provenance("workflow.gg.yaml")
 | **FAQ.md** | Common objections | Decision-makers, skeptics | 10 min |
 | **MAIN_SPEC.md** | Complete standard | Implementers, auditors | 45 min |
 | **STRATEGIC_CONTEXT.md** | Big picture | Executives, investors | 20 min |
+| **CRITICAL_GAPS_ANALYSIS.md** | v1.0 roadmap & strategic gaps | Standards architects, contributors | 30 min |
 
 ---
 
