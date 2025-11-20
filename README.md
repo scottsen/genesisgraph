@@ -17,7 +17,7 @@ tags:
 
 # GenesisGraph: Universal Verifiable Process Provenance
 
-**v0.2 Public Working Draft — November 2025**
+**v0.3.0 — November 2025**
 
 GenesisGraph is an **open standard for proving how things were made**. It provides cryptographically verifiable provenance for AI pipelines, manufacturing, scientific research, healthcare, and any workflow where "show me how you made this" matters.
 
@@ -518,8 +518,9 @@ python scripts/verify_transparency_anchoring.py examples/level-b-partial-envelop
 
 ## Implementation Roadmap
 
-This package represents the **v0.2** deliverables for selective disclosure:
+This package represents the **v0.3.0** release:
 
+**Completed (v0.1.0-alpha):**
 - [x] Normative §9.2 specification text
 - [x] Core schema extensions
 - [x] Three disclosure-level examples
@@ -532,7 +533,7 @@ This package represents the **v0.2** deliverables for selective disclosure:
 - [x] Comprehensive did:web support with SSRF protection, rate limiting, and TLS validation
 - [x] Integration tests and examples for did:web
 
-**Completed (v0.2):**
+**Completed (v0.2.0):**
 - [x] Certificate Transparency log integration (RFC 6962) - production-ready Trillian and Rekor support
 - [x] Merkle tree inclusion and consistency proofs for tamper-evident audit trails
 - [x] Multi-log witness support for cross-organizational verification
@@ -540,16 +541,15 @@ This package represents the **v0.2** deliverables for selective disclosure:
 - [x] 666 comprehensive tests covering all RFC 6962 operations
 - [x] Full documentation in `docs/TRANSPARENCY_LOG.md`
 - [x] Enterprise-ready for regulated industries (AS9100D, ISO 9001:2015, FDA 21 CFR Part 11)
+
+**Completed (v0.3.0):**
+- [x] SD-JWT / BBS+ selective disclosure (cryptographic privacy)
+- [x] Profile-specific validators (gg-ai-basic-v1, gg-cam-v1)
+- [x] Python/JavaScript SDK libraries
+- [x] ZK proof-of-policy templates (zero-knowledge compliance)
 - [x] Additional DID methods (did:ion, did:ethr) with comprehensive test coverage
 - [x] ION (Sidetree on Bitcoin) DID resolution with Universal Resolver support
 - [x] Ethereum DID resolution with multi-network support
-
-**v0.3 Features:**
-- [x] SD-JWT / BBS+ selective disclosure (cryptographic privacy) — ✅ **Completed**
-- [x] Profile-specific validators (gg-ai-basic-v1, gg-cam-v1) — ✅ **Completed**
-- [x] Python/JavaScript SDK libraries — ✅ **Completed**
-- [x] ZK proof-of-policy templates (zero-knowledge compliance) — ✅ **Completed**
-- [x] Additional DID methods (did:ion, did:ethr) — ✅ **Completed**
 
 ## Comparison Matrix: Verification Strengths
 

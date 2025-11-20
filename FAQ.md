@@ -393,7 +393,7 @@ operations:
 
 ### Who is already using GenesisGraph?
 
-**Status (v0.2):** Early adoption, reference implementations in progress.
+**Status (v0.3.0):** Early adoption, SDK libraries available, reference implementations in progress.
 
 **Current integrations:**
 - **AI workflow wrappers** - Python reference implementations
@@ -429,11 +429,15 @@ operations:
 
 ### What's the roadmap for GenesisGraph?
 
-**v0.2 (Current):** Public working draft
+**v0.3.0 (Current):** Production-ready features
 - Core specification with selective disclosure
 - JSON Schema validation
 - Certificate Transparency integration (RFC 6962)
-- did:web organizational identity support
+- DID support: did:key, did:web, did:ion, did:ethr
+- SD-JWT and BBS+ selective disclosure
+- Industry-specific profile validators (AI, manufacturing)
+- Python and JavaScript SDK libraries
+- Zero-knowledge proof templates
 - Production signature verification
 - Reference examples
 
@@ -563,7 +567,7 @@ tools:
 
 **No one.** GenesisGraph is community-governed open standard.
 
-**Current status:** Individual stewardship (v0.2 public working draft)
+**Current status:** Individual stewardship (v0.3.0 release)
 **Future governance:** W3C Community Group or Linux Foundation AI & Data
 
 **No vendor lock-in. No licensing fees. No IP claims.**

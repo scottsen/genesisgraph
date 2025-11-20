@@ -9,8 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.3.0] - 2025-11-20
+
 ### Added
-- **Python and JavaScript SDK Libraries** (closed #14)
+
+- **Additional DID Methods: ION and Ethereum** (PR #21)
+  - ION (Sidetree on Bitcoin) DID resolution with Universal Resolver support
+  - Ethereum DID resolution with multi-network support (mainnet, sepolia, polygon)
+  - Comprehensive test coverage with 574 new tests
+  - Full integration with existing DID resolver infrastructure
+  - Support for both direct resolution and Universal Resolver fallback
+
+- **Zero-Knowledge Proof Templates** (PR #20)
+  - Template system for zero-knowledge compliance proofs
+  - Range proof templates for proving parameter bounds without revealing values
+  - Integration with existing profile validator system
+  - Examples demonstrating ZK proof usage in compliance scenarios
+
+- **Python and JavaScript SDK Libraries** (PR #19, closed #14)
   - Python builder API with fluent interface for programmatic document creation
   - Comprehensive type hints and validation in Python SDK
   - JavaScript/TypeScript SDK with full type definitions
@@ -22,7 +40,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Example code in `examples/python_sdk_quickstart.py` and `sdks/javascript/examples/quickstart.ts`
   - Enables programmatic integration for CI/CD pipelines and automation tools
 
-- **SD-JWT and BBS+ Selective Disclosure** (closed #10)
+- **Industry-Specific Profile Validators** (PR #18, closed #12)
+  - `gg-ai-basic-v1`: AI/ML pipeline validation with FDA 21 CFR Part 11 support
+  - `gg-cam-v1`: Computer-aided manufacturing validation with ISO-9001 compliance
+  - Profile registry with automatic profile detection based on operation types
+  - ISO 9001:2015 compliance validator for quality management systems
+  - FDA 21 CFR Part 11 compliance validator for electronic records and signatures
+  - Privacy-preserving validation with redacted parameter support
+  - CLI integration with `--verify-profile` and `--profile` flags
+  - Comprehensive test suite covering AI, manufacturing, and compliance validators
+  - Full documentation in `docs/PROFILE_VALIDATORS.md`
+  - Automated compliance checking for enterprise customers and regulatory use cases
+
+- **SD-JWT and BBS+ Selective Disclosure** (PR #17, closed #10)
   - SD-JWT (Selective Disclosure JWT) implementation following IETF draft specification
   - BBS+ signature support for privacy-preserving credential verification
   - Predicate proofs for range validation without revealing exact values
@@ -34,17 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Example attestations demonstrating SD-JWT, BBS+, and predicate usage
   - Optional `credentials` extra dependencies for advanced cryptographic features
 
-- **Industry-Specific Profile Validators** (closed #12)
-  - `gg-ai-basic-v1`: AI/ML pipeline validation with FDA 21 CFR Part 11 support
-  - `gg-cam-v1`: Computer-aided manufacturing validation with ISO-9001 compliance
-  - Profile registry with automatic profile detection based on operation types
-  - ISO 9001:2015 compliance validator for quality management systems
-  - FDA 21 CFR Part 11 compliance validator for electronic records and signatures
-  - Privacy-preserving validation with redacted parameter support
-  - CLI integration with `--verify-profile` and `--profile` flags
-  - Comprehensive test suite covering AI, manufacturing, and compliance validators
-  - Full documentation in `docs/PROFILE_VALIDATORS.md`
-  - Automated compliance checking for enterprise customers and regulatory use cases
+### Fixed
+- Test mocking code duplication eliminated (PR #22, closed #16)
+  - Refactored DID resolution mocking to eliminate code duplication
+  - Improved test maintainability and consistency
 
 ### Removed
 - TiaCAD integration references from all documentation (closed #15)
