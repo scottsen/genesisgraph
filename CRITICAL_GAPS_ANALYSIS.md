@@ -1210,6 +1210,348 @@ This is the difference between "used by enthusiasts" and "required by regulators
 
 ---
 
+## Difficulty Analysis: What CAN'T Be Fully Plugged?
+
+**Last Updated:** 2025-11-21
+**Analysis:** Comprehensive review of gaps to identify fundamental limitations vs solvable problems
+
+While the 10 gaps above are all addressable to varying degrees, some have **fundamental limitations** or **exceptionally high barriers** that prevent complete solutions. This section provides an honest assessment of what's achievable vs what requires inherent tradeoffs.
+
+### 🔴 Exceptionally Hard to Plug (High Barrier to Entry)
+
+These gaps can be addressed but face significant non-technical barriers:
+
+#### 1. **Anti-Capture Governance** (Gap #8) - HIGHEST ORGANIZATIONAL BARRIER
+**Why Exceptionally Hard:**
+- **Social/political problem, not technical** - Requires aligning competing interests
+- **Requires sustained resources** (~$1M+ annually for foundation operations)
+- **Long timeline** (12-16 weeks minimum, realistically 6-12 months)
+- **Partnership-dependent** - Need commitment from multiple major organizations
+- **Legal complexity** - Nonprofit formation, international governance, trademark policy
+
+**Historical Risk:**
+- OpenAPI → SmartBear (partial capture)
+- RSS → Fragmentation → Death
+- Kubernetes → CNCF (successfully escaped capture)
+
+**Mitigation Strategy:**
+- Start with informal steering committee
+- Formalize governance incrementally as ecosystem grows
+- Build community consensus before foundation formation
+- Secure diverse funding sources early
+
+**Can it be plugged?** Yes, but requires:
+- 3-5 founding organizations with aligned interests
+- Legal counsel specializing in open standards governance
+- Sustained funding commitment
+- Community buy-in and transparency
+
+**Risk Level:** 🔴 VERY HIGH (organizational, not technical)
+
+---
+
+#### 2. **AI Agent Provenance** (Gap #9) - HIGHEST TECHNICAL NOVELTY
+**Why Exceptionally Hard:**
+- **Novel territory** - No existing standard to reference or adapt
+- **Partnership-dependent** - Requires collaboration with AI labs (Anthropic, OpenAI, Google)
+- **Moving target** - AI safety/alignment standards still evolving
+- **Complex requirements:**
+  - Multi-turn conversation provenance
+  - Reasoning trace selective disclosure
+  - Tool delegation across sessions
+  - Safety/alignment certification
+  - Agent memory provenance
+
+**Technical Challenges:**
+- How to represent continuous agent operations in discrete provenance model?
+- How to redact reasoning while proving safety properties?
+- How to capture tool delegation chains across sessions?
+- How to validate safety claims without access to model internals?
+
+**Mitigation Strategy:**
+- Partner with one AI lab for pilot implementation
+- Start with simpler use cases (single-turn tool use)
+- Iterate based on real-world agent deployments
+- Build on delegation framework (Gap #2) as foundation
+
+**Can it be plugged?** Partially, with caveats:
+- ✅ Can capture agent operations (tool use, delegation)
+- ✅ Can record reasoning traces with selective disclosure
+- ⚠️ Safety/alignment attestations require trusted evaluators
+- ⚠️ Continuous agent behavior hard to represent in discrete graph
+- ❌ Can't verify agent's internal reasoning without model access
+
+**Risk Level:** 🔴 VERY HIGH (novel + partnership-dependent)
+
+---
+
+### 🟡 Fundamental Limitations (Inherent Tradeoffs)
+
+These represent **architectural constraints** where complete solutions are impossible or require unacceptable tradeoffs:
+
+#### 3. **Execution Trace Validation** (Part of Gap #6)
+**The Fundamental Problem:**
+GenesisGraph can prove what was *declared*, but **cannot prove what was actually executed** without external infrastructure.
+
+**Example Attack:**
+```yaml
+operations:
+  - id: op_training
+    parameters:
+      learning_rate: 0.001  # ✅ Declared
+    outputs: [model.safetensors@1]
+    # ❌ Nothing prevents actual execution with learning_rate=0.1
+```
+
+**Why This Can't Be Fully Solved:**
+- **Requires Trusted Execution Environments (TEEs)** - SGX, SEV, TrustZone
+  - Massive overhead (performance, cost, complexity)
+  - Limited tooling compatibility
+  - Vendor-specific implementations
+- **Reproducible builds required** - Hard to guarantee across platforms
+- **Side-effect monitoring needed** - Requires complete sandboxing
+- **Determinism assumption** - Many operations are inherently non-deterministic
+
+**The Tradeoff:**
+- **Option A:** Require TEEs → Maximum verifiability, minimum flexibility
+- **Option B:** Trust declarations → Maximum flexibility, reliance on attestations
+
+**GenesisGraph Choice:** Option B with optional TEE attestations
+
+**Mitigation Strategies:**
+1. **Execution trace hashing** - Record OpenTelemetry traces, hash them
+2. **TEE attestations** - Optional SGX quotes for sealed subgraphs
+3. **Policy evaluation traces** - Capture OPA/Cedar decision logs
+4. **Transparency logs** - Non-repudiation for declarations
+5. **Reputation systems** - Track operator honesty over time
+
+**Can it be plugged?** Only with TEE infrastructure (significant overhead)
+
+**Risk Level:** 🟡 MEDIUM (architectural limitation)
+
+---
+
+#### 4. **Privacy Leakage Through Metadata**
+**The Fundamental Problem:**
+Even with sealed subgraphs (Level C), **metadata leaks information**:
+
+```yaml
+operations:
+  - id: op_proprietary_cam
+    type: sealed_subgraph  # Content hidden
+    sealed:
+      merkle_root: sha256:abc123...
+    # ❌ But these leak information:
+    # - Operation count (reveals workflow complexity)
+    # - Timestamps (reveals execution duration)
+    # - Entity types (reveals data categories)
+    # - Tool versions (reveals technology stack)
+```
+
+**Timing Analysis Example:**
+- 10 operations, 2 hours execution → Likely complex machining
+- 1 operation, 5 minutes → Likely simple transformation
+- 100+ operations → Multi-step AI pipeline
+
+**Why This Can't Be Fully Solved:**
+- **Verification requires metadata** - Need operation count, types, connections
+- **Complete hiding breaks graph structure** - Can't validate DAG without edges
+- **Timestamps needed for freshness** - Replay protection requires time data
+
+**The Tradeoff:**
+- **Option A:** Hide all metadata → Unverifiable (can't check graph validity)
+- **Option B:** Expose minimal metadata → Some information leakage
+
+**GenesisGraph Choice:** Option B (necessary metadata only)
+
+**Mitigation Strategies:**
+1. **Metadata aggregation** - Batch multiple sealed subgraphs
+2. **Dummy operations** - Add noise to hide true operation count
+3. **Timestamp fuzzing** - Round to hour/day rather than exact second
+4. **Type generalization** - Use "computation" instead of specific tool types
+
+**Can it be plugged?** No - Inherent tradeoff between verifiability and privacy
+
+**Risk Level:** 🟢 LOW (acceptable tradeoff, well-understood)
+
+---
+
+#### 5. **Nondeterminism in AI/GPU Operations**
+**The Fundamental Problem:**
+Many operations are **inherently non-reproducible**:
+
+**Sources of Nondeterminism:**
+- **Stochastic sampling** - Temperature-based LLM generation
+- **GPU floating-point** - Different hardware → different rounding
+- **Concurrency** - Race conditions, thread scheduling
+- **Random initialization** - Neural network training
+- **External data** - Network requests, database queries
+
+**Example:**
+```yaml
+operations:
+  - id: op_inference
+    type: ai_inference
+    parameters:
+      temperature: 0.7  # Stochastic sampling
+      seed: 42          # ⚠️ May not guarantee reproducibility
+    # Result: Different outputs on each run
+```
+
+**Why This Can't Be Fully Solved:**
+- **Stochasticity is intentional** - Desired behavior for creativity
+- **GPU hardware varies** - CUDA operations not bit-exact across GPUs
+- **Real-world operations** - Database queries, network calls change state
+
+**The Tradeoff:**
+- **Option A:** Require bit-exact reproducibility → Eliminate stochastic operations
+- **Option B:** Document nondeterminism → Accept approximate reproducibility
+
+**GenesisGraph Choice:** Option B (document sources, claim approximate reproducibility)
+
+**Mitigation Strategies:**
+1. **Declare nondeterminism sources** (Gap #6 improvement):
+   ```yaml
+   nondeterminism:
+     sources: [random_seed, sampling, cuda_ops]
+     reproducibility: approximate  # Within 5% of original
+     seed: 42
+   ```
+
+2. **Capture execution traces** - Record actual outputs for comparison
+
+3. **Statistical validation** - Multiple runs should cluster around similar results
+
+4. **Deterministic mode flags** - When possible (e.g., `torch.use_deterministic_algorithms(True)`)
+
+**Can it be plugged?** No - Many operations fundamentally nondeterministic
+
+**Risk Level:** 🟢 LOW (well-understood in field, document rather than eliminate)
+
+---
+
+### 🟢 Solvable Gaps (High Effort, But Achievable)
+
+These gaps face high barriers but **can be fully addressed** with sufficient time and resources:
+
+#### Fully Addressable (High Effort):
+- ✅ **Threat Model** (Gap #1) - 2-3 weeks, requires security expertise
+- ✅ **Delegation & Authorization** (Gap #2) - 4-6 weeks, novel but no fundamental blockers
+- ✅ **Lifecycle & Revocation** (Gap #3) - 3-4 weeks, well-understood problem
+- ✅ **Registry Infrastructure** (Gap #4) - 8-12 weeks, operational complexity but proven models
+- ✅ **Human UX** (Gap #5) - 6-8 weeks, design work but straightforward
+- ✅ **Formal Semantics** (Gap #6) - 4-6 weeks, requires formal methods expertise
+- ✅ **Dispute Resolution** (Gap #7) - 3-4 weeks, process design
+- ✅ **Economic Model** (Gap #10) - 16-20 weeks, business model design
+
+---
+
+## Summary: Gaps by Difficulty & Achievability
+
+| Gap | Difficulty | Achievability | Primary Barrier | Timeline |
+|-----|-----------|---------------|-----------------|----------|
+| **1. Threat Model** | 🟡 Medium | ✅ Fully Solvable | Security expertise | 2-3 weeks |
+| **2. Delegation** | 🟡 Medium-High | ✅ Fully Solvable | Novel design | 4-6 weeks |
+| **3. Lifecycle** | 🟢 Medium | ✅ Fully Solvable | Implementation | 3-4 weeks |
+| **4. Registry** | 🟡 High | ✅ Fully Solvable | Infrastructure | 8-12 weeks |
+| **5. Human UX** | 🟢 Medium | ✅ Fully Solvable | Design work | 6-8 weeks |
+| **6. Formal Semantics** | 🟡 High | ⚠️ Partially Solvable | Execution trace validation has limits | 4-6 weeks |
+| **7. Dispute Resolution** | 🟢 Medium | ✅ Fully Solvable | Process design | 3-4 weeks |
+| **8. Anti-Capture** | 🔴 Very High | ⚠️ Mitigatable | Social/organizational | 12-16 weeks |
+| **9. AI Agent** | 🔴 Very High | ⚠️ Partially Solvable | Novel + partnerships | 8-12 weeks |
+| **10. Economic Model** | 🟡 High | ✅ Fully Solvable | Business strategy | 16-20 weeks |
+
+**Legend:**
+- ✅ **Fully Solvable** - Can be completely addressed with effort
+- ⚠️ **Partially Solvable** - Can be improved but has inherent limitations
+- ⚠️ **Mitigatable** - Risk can be reduced but not eliminated
+
+---
+
+## Strategic Recommendations
+
+### High-Leverage Priorities (Biggest Impact per Effort)
+
+**Tier 1 - Do First** (Enable core use cases):
+1. **Lifecycle & Revocation** (Gap #3) - 3-4 weeks, unblocks compliance
+2. **Threat Model** (Gap #1) - 2-3 weeks, unblocks enterprise security review
+3. **Delegation** (Gap #2) - 4-6 weeks, enables AI agent governance
+
+**Total: ~9-13 weeks** → Unlocks regulatory adoption + AI governance market
+
+**Tier 2 - Do Next** (Ecosystem maturity):
+4. **Human UX** (Gap #5) - 6-8 weeks, drives mainstream adoption
+5. **Formal Semantics** (Gap #6) - 4-6 weeks, legal defensibility
+6. **Registry Infrastructure** (Gap #4) - 8-12 weeks, ecosystem sustainability
+
+**Total: ~18-26 weeks** → Enables broad ecosystem participation
+
+**Tier 3 - Do Later** (Strategic positioning):
+7. **AI Agent Provenance** (Gap #9) - 8-12 weeks, market leadership
+8. **Anti-Capture Governance** (Gap #8) - 12-16 weeks, long-term trust
+9. **Dispute Resolution** (Gap #7) - 3-4 weeks, mature ecosystem need
+10. **Economic Model** (Gap #10) - 16-20 weeks, sustainability
+
+**Total: ~39-52 weeks** → Long-term viability and market leadership
+
+---
+
+## Acceptance Criteria for "Gaps Plugged"
+
+### For Fully Solvable Gaps
+A gap is considered "plugged" when:
+- [ ] Specification updated with complete design
+- [ ] Implementation complete with ≥90% test coverage
+- [ ] Documentation published (guides + examples)
+- [ ] External review completed (2+ domain experts)
+- [ ] Real-world pilot deployment successful
+
+### For Partially Solvable Gaps
+A gap is considered "addressed" when:
+- [ ] Limitations clearly documented
+- [ ] Mitigation strategies implemented and tested
+- [ ] Best practices guide published
+- [ ] Tradeoffs explained in documentation
+- [ ] Optional enhancements available (e.g., TEE support)
+
+### For Organizational Gaps
+A gap is considered "mitigated" when:
+- [ ] Governance structure established
+- [ ] Process documentation published
+- [ ] Initial stakeholders committed
+- [ ] Anti-capture mechanisms active
+- [ ] Transparency measures in place
+
+---
+
+## Conclusion: Realistic Expectations
+
+**What GenesisGraph CAN Achieve:**
+- ✅ Cryptographic proof of declared provenance
+- ✅ Selective disclosure (IP protection + compliance)
+- ✅ AI agent delegation and authorization
+- ✅ Lifecycle and revocation management
+- ✅ Multi-stakeholder governance (with community support)
+- ✅ Self-sustaining ecosystem (with business model execution)
+
+**What GenesisGraph CANNOT Fully Achieve:**
+- ❌ **Execution validation without TEEs** - Can declare but not verify execution
+- ❌ **Perfect metadata privacy** - Verification requires some metadata exposure
+- ❌ **Bit-exact reproducibility** - Many operations inherently nondeterministic
+- ❌ **Guaranteed capture resistance** - Social problems require ongoing community vigilance
+
+**What This Means:**
+GenesisGraph is **architurally sound and strategically positioned** for real-world adoption. The "unpluggable" gaps are well-understood tradeoffs, not fatal flaws. The "exceptionally hard" gaps (governance, AI agents) require partnerships and time, but are achievable.
+
+**The path to v1.0 is clear:**
+- **Phase 1 (Months 1-6):** Plug critical technical gaps (#1, #2, #3)
+- **Phase 2 (Months 7-12):** Build ecosystem infrastructure (#4, #5, #6)
+- **Phase 3 (Months 13-18):** Establish governance and partnerships (#7, #8, #9, #10)
+
+**Total realistic timeline: 16-18 months** from v0.3.0 to production-ready v1.0.
+
+---
+
 **Document Status:** Draft for review
 **Next Review:** 2025-12-01
 **Owner:** GenesisGraph Core Team
