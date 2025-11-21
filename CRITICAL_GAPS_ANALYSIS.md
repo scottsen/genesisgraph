@@ -3,6 +3,21 @@
 **Created:** 2025-11-20
 **Version:** 1.0
 **Status:** Strategic Analysis for v1.0+ Planning
+**Last Updated:** 2025-11-21
+
+---
+
+## 📋 Document Purpose
+
+**This document provides the STRATEGIC ANALYSIS and detailed context for the [ROADMAP.md](ROADMAP.md).**
+
+- **ROADMAP.md** = Actionable development plan with phases, timelines, and priorities
+- **CRITICAL_GAPS_ANALYSIS.md** = In-depth analysis of WHY each gap matters and WHAT to build
+
+**If you want to:**
+- **See the development plan** → Read [ROADMAP.md](ROADMAP.md)
+- **Understand the strategic reasoning** → Read this document
+- **Get tactical implementation details** → Read [IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md) (historical reference)
 
 ---
 
@@ -10,7 +25,7 @@
 
 GenesisGraph v0.3.0 is **extremely strong**—arguably the first provenance standard that actually works in the real world because it solves the IP-vs-compliance dilemma through selective disclosure. However, for global institutional adoption at scale, there are **10 critical gaps** that must be addressed.
 
-This document identifies these gaps and provides actionable improvement recommendations for the v1.0+ roadmap.
+This document identifies these gaps and provides actionable improvement recommendations for the v1.0+ roadmap. The gaps have been incorporated into the development roadmap at [ROADMAP.md](ROADMAP.md).
 
 **Priority Classification:**
 - 🔴 **Critical** - Blocks institutional adoption, creates security vulnerabilities

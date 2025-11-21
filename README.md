@@ -32,9 +32,14 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 1. **[QUICKSTART.md](QUICKSTART.md)** - 5-minute tutorial with simplest possible examples
 2. **[USE_CASES.md](USE_CASES.md)** - Real-world integrations (AI, science, media)
 3. **[FAQ.md](FAQ.md)** - Common questions: "Why not PROV-O?", "Do I need blockchain?", etc.
-4. **[spec/MAIN_SPEC.md](spec/MAIN_SPEC.md)** - Complete specification (886 lines)
-5. **[STRATEGIC_CONTEXT.md](STRATEGIC_CONTEXT.md)** - Why this matters, adoption strategy, 5-year vision
-6. **[CRITICAL_GAPS_ANALYSIS.md](CRITICAL_GAPS_ANALYSIS.md)** - Strategic roadmap for v1.0, missing layers, improvements
+4. **[spec/MAIN_SPEC.md](spec/MAIN_SPEC.md)** - Complete specification (24,317 lines)
+
+**For developers and contributors:**
+
+5. **[ROADMAP.md](ROADMAP.md)** - 📍 **PRIMARY ROADMAP** - Unified development plan from v0.3.0 → v1.0
+6. **[STRATEGIC_CONTEXT.md](STRATEGIC_CONTEXT.md)** - Why this matters, adoption strategy, 5-year vision
+7. **[CRITICAL_GAPS_ANALYSIS.md](CRITICAL_GAPS_ANALYSIS.md)** - Strategic analysis of 10 gaps for v1.0 (detailed context for roadmap)
+8. **[IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md)** - Tactical implementation details (historical reference)
 
 **Enterprise users:** See **[docs/DID_WEB_GUIDE.md](docs/DID_WEB_GUIDE.md)** for did:web support - use your organization's domain for identity management.
 
