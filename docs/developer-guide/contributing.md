@@ -280,12 +280,85 @@ Releases are handled by maintainers. The process includes:
 3. Create GitHub release
 4. Publish to PyPI
 
+## Current Priorities (v0.3.0 → v1.0)
+
+GenesisGraph is on a path to v1.0 production readiness. Here are the **immediate priorities** where contributions are most valuable:
+
+### Phase 0.4: Foundation & Quality (Current) ⭐ **Help Wanted**
+
+**Timeline:** 4-6 weeks | **Status:** In Progress
+
+High-impact areas for new contributors:
+
+#### 1. Test Coverage to 90%+ 🔴 **Critical**
+- **Current:** 76% overall coverage
+- **Target:** ≥90% across all modules
+- **Focus areas:**
+  - Edge cases (unicode, large files, circular dependencies)
+  - Integration tests for end-to-end workflows
+  - Performance regression tests
+- **Skills needed:** Python, pytest
+- **Good first issue:** Pick an untested function and write comprehensive tests
+
+#### 2. API Documentation 🟡 **High Priority**
+- **Goal:** Auto-generated API docs with mkdocstrings
+- **Tasks:**
+  - Enhance docstrings with examples
+  - Add missing type hints
+  - Create usage examples for each major module
+- **Skills needed:** Documentation writing, Python
+- **Good first issue:** Add examples to existing docstrings
+
+#### 3. Type Checking Improvements 🟡 **High Priority**
+- **Goal:** 100% type coverage for public API
+- **Current:** Mypy configured but not all modules fully typed
+- **Tasks:**
+  - Add missing type hints
+  - Fix type inconsistencies
+  - Enable strict mypy mode
+- **Skills needed:** Python, type systems
+
+### Upcoming Phases (Help shape the future!)
+
+#### Phase 0.5: Security & Lifecycle (Next)
+- Formal threat model documentation
+- Lifecycle & revocation framework
+- Security audit preparation
+
+#### Phase 0.6: Delegation & Authorization (Strategic)
+- AI agent authorization chains
+- Policy engine integration (OPA, Cedar)
+- Delegation provenance
+
+**See [ROADMAP.md](../strategic/roadmap.md) for complete development plan.**
+
+### High-Value Contributions
+
+These contributions have outsized impact:
+
+1. **Security Analysis** - Review code for vulnerabilities
+2. **Performance Optimization** - Profile and optimize hot paths
+3. **Real-World Examples** - Your domain's provenance use case
+4. **Domain Profiles** - Industry-specific validators
+5. **SDK Improvements** - Python/JavaScript SDK enhancements
+
+### Labels for Issues
+
+When looking for issues to work on:
+- `good first issue` - Great for new contributors
+- `help wanted` - Maintainers need community help
+- `high priority` - Blocks v1.0 release
+- `documentation` - Documentation improvements
+- `testing` - Test coverage improvements
+- `roadmap: phase-0.4` - Current phase work
+
 ## Questions?
 
 If you have questions not covered here:
 - Open a GitHub Discussion
 - Reach out to maintainers
 - Check the FAQ.md
+- Review [ROADMAP.md](../strategic/roadmap.md) for strategic direction
 
 ---
 

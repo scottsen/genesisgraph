@@ -33,7 +33,7 @@ jobs:
 
     - name: Type check with mypy
       run: |
-        mypy genesisgraph/ --ignore-missing-imports
+        mypy genesisgraph/
 
     - name: Run tests
       run: |
