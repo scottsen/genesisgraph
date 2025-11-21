@@ -25,42 +25,85 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start — Choose Your Path
 
-**New to GenesisGraph?** Start here:
+**New to GenesisGraph?** Follow this progressive learning path:
 
-1. **[QUICKSTART.md](QUICKSTART.md)** - 5-minute tutorial with simplest possible examples
-2. **[USE_CASES.md](USE_CASES.md)** - Real-world integrations (AI, science, media)
-3. **[FAQ.md](FAQ.md)** - Common questions: "Why not PROV-O?", "Do I need blockchain?", etc.
-4. **[spec/MAIN_SPEC.md](spec/MAIN_SPEC.md)** - Complete specification (24,317 lines)
+### Layer 1: Essential Basics (5-10 minutes)
+Start here to understand what GenesisGraph is and why it matters:
 
-**For developers and contributors:**
+1. **[5-Minute Quickstart](docs/getting-started/quickstart.md)** - Simplest possible example (CAD file export)
+2. **[Disclosure Levels (A/B/C)](docs/user-guide/disclosure-levels.md)** - **Core innovation**: Choose what to reveal
 
-5. **[ROADMAP.md](ROADMAP.md)** - 📍 **PRIMARY ROADMAP** - Unified development plan from v0.3.0 → v1.0
-6. **[STRATEGIC_CONTEXT.md](STRATEGIC_CONTEXT.md)** - Why this matters, adoption strategy, 5-year vision
-7. **[CRITICAL_GAPS_ANALYSIS.md](CRITICAL_GAPS_ANALYSIS.md)** - Strategic analysis of 10 gaps for v1.0 (detailed context for roadmap)
-8. **[IMPROVEMENT_PLAN.md](IMPROVEMENT_PLAN.md)** - Tactical implementation details (historical reference)
+### Layer 2: User Guidance (15-30 minutes)
+Learn how to use GenesisGraph features effectively:
 
-**Enterprise users:** See **[docs/DID_WEB_GUIDE.md](docs/DID_WEB_GUIDE.md)** for did:web support - use your organization's domain for identity management.
+3. **[User Guide Overview](docs/user-guide/overview.md)** - Progressive feature introduction
+4. **[Examples & Use Cases](docs/use-cases.md)** - Real-world integrations (AI, manufacturing, research)
+5. **[FAQ](docs/faq.md)** - Common questions: "Why not PROV-O?", "Do I need blockchain?"
 
-**Want to integrate?** See `USE_CASES.md` §Integration Patterns for wrapper/native/post-hoc approaches.
+### Layer 3: Technical Depth (30-60 minutes)
+Understand the architecture and integrate with your systems:
 
-**Explore documentation incrementally:** Use our Progressive Reveal CLI to understand docs at your own pace:
+6. **[Architecture](docs/developer-guide/architecture.md)** - System design and components
+7. **[Main Specification](docs/specifications/main-spec.md)** - Complete formal standard
+8. **[SDK References](docs/reference/sdk-quick-reference.md)** - API quick lookup
+
+### Layer 4: Strategic Context (20-45 minutes)
+Explore vision, roadmap, and planning for decision-makers:
+
+9. **[Vision & Why It Matters](docs/strategic/vision.md)** - 5-year adoption strategy
+10. **[Roadmap](docs/strategic/roadmap.md)** - 📍 **PRIMARY ROADMAP** - v0.3.0 → v1.0
+11. **[Critical Gaps Analysis](docs/strategic/critical-gaps.md)** - Strategic gaps for v1.0
+
+---
+
+### 🎯 Quick Navigation by Role
+
+<table>
+<tr>
+<td><strong>👨‍💻 Developers</strong><br/>
+→ <a href="docs/getting-started/quickstart.md">Quickstart</a><br/>
+→ <a href="docs/getting-started/examples.md">Examples</a><br/>
+→ <a href="docs/developer-guide/architecture.md">Architecture</a>
+</td>
+<td><strong>🏢 Decision-Makers</strong><br/>
+→ <a href="docs/faq.md">FAQ</a><br/>
+→ <a href="docs/use-cases.md">Use Cases</a><br/>
+→ <a href="docs/strategic/vision.md">Vision</a>
+</td>
+</tr>
+<tr>
+<td><strong>🤖 AI/ML Engineers</strong><br/>
+→ <a href="docs/user-guide/disclosure-levels.md">Disclosure Levels</a><br/>
+→ <a href="docs/use-cases.md#ai-pipelines">AI Examples</a><br/>
+→ <a href="docs/user-guide/profile-validators.md">AI Validators</a>
+</td>
+<td><strong>🔬 Researchers</strong><br/>
+→ <a href="docs/specifications/main-spec.md">Specification</a><br/>
+→ <a href="docs/user-guide/selective-disclosure.md">Cryptography</a><br/>
+→ <a href="docs/specifications/zkp-templates.md">ZKP Templates</a>
+</td>
+</tr>
+</table>
+
+---
+
+### 📖 Explore Documentation Incrementally
+
+Use our Progressive Reveal CLI to consume docs at your own pace:
 
 ```bash
 # Install the tool
 cd tools/progressive-reveal-cli && pip install -e .
 
-# Quick exploration
-./scripts/explore_docs.sh --level 0 --category essential
-
-# Or explore specific docs
-reveal README.md --level 1          # See structure
-reveal QUICKSTART.md --level 2      # Preview content
-reveal FAQ.md --level 3 --grep "blockchain"  # Search topics
+# Explore by depth level
+reveal docs/getting-started/quickstart.md --level 1   # See structure
+reveal docs/user-guide/overview.md --level 2          # Preview content
+reveal docs/faq.md --level 3 --grep "blockchain"     # Search topics
 ```
 
-**See [DOCUMENT_EXPLORER_GUIDE.md](DOCUMENT_EXPLORER_GUIDE.md) for complete documentation exploration guide.**
+**Full guide:** [Document Explorer Guide](DOCUMENT_EXPLORER_GUIDE.md)
 
 ---
 
@@ -144,23 +187,47 @@ This package contains the complete v0.3 implementation with:
 
 ```
 genesisgraph/
-├── spec/
-│   └── MAIN_SPEC.md              # Updated specification with §9.2 selective disclosure
+├── docs/                          # Organized documentation (see mkdocs.yml)
+│   ├── getting-started/           # Layer 1: Essential basics
+│   │   ├── installation.md
+│   │   ├── quickstart.md
+│   │   └── examples.md
+│   ├── user-guide/                # Layer 2: Feature guides
+│   │   ├── overview.md
+│   │   ├── disclosure-levels.md   # A/B/C model explained
+│   │   ├── did-web-guide.md       # Enterprise identity
+│   │   ├── selective-disclosure.md # SD-JWT, BBS+ cryptography
+│   │   ├── transparency-log.md     # RFC 6962 audit trails
+│   │   └── profile-validators.md   # Industry compliance
+│   ├── developer-guide/           # Layer 3: Architecture & integration
+│   │   ├── architecture.md
+│   │   ├── contributing.md
+│   │   ├── security.md
+│   │   └── troubleshooting.md
+│   ├── reference/                 # API & SDK reference
+│   │   ├── sdk-development-guide.md
+│   │   ├── sdk-quick-reference.md
+│   │   └── implementation-summary.md
+│   ├── specifications/            # Formal definitions
+│   │   ├── main-spec.md           # Complete specification
+│   │   └── zkp-templates.md       # Zero-knowledge proofs
+│   ├── strategic/                 # Layer 4: Vision & planning
+│   │   ├── vision.md
+│   │   ├── roadmap.md
+│   │   └── critical-gaps.md
+│   ├── use-cases.md               # Real-world examples
+│   └── faq.md                     # Common questions
 ├── schema/
-│   └── genesisgraph-core-v0.1.yaml  # Core schema with selective disclosure support
-├── docs/
-│   └── DID_WEB_GUIDE.md          # Complete guide for did:web usage
+│   └── genesisgraph-core-v0.1.yaml  # Core schema with selective disclosure
 ├── examples/
 │   ├── level-a-full-disclosure.gg.yaml     # Level A: Full transparency
-│   ├── level-b-partial-envelope.gg.yaml    # Level B: Policy claims only
-│   ├── level-c-sealed-subgraph.gg.yaml     # Level C: Sealed subgraph with commitments
-│   ├── workflow-with-did-web.gg.yaml       # Enterprise workflow using did:web
-│   ├── did-web-example.json                # Sample DID document
-│   └── did-web-organization.json           # Organization DID document with multiple keys
+│   ├── level-b-partial-envelope.gg.yaml    # Level B: Verified privacy
+│   ├── level-c-sealed-subgraph.gg.yaml     # Level C: Zero-knowledge
+│   └── workflow-with-did-web.gg.yaml       # Enterprise workflow
 ├── scripts/
 │   ├── verify_sealed_subgraph.py           # Merkle inclusion proof verifier
 │   └── verify_transparency_anchoring.py    # Transparency log anchor verifier
-└── genesisgraph/
+└── genesisgraph/                  # Python SDK implementation
     ├── did_resolver.py             # DID resolution (did:key, did:web, did:ion, did:ethr)
     └── validator.py                # Signature verification with DID support
 ```
@@ -203,7 +270,7 @@ validator = GenesisGraphValidator(verify_profile=True, profile_id='gg-cam-v1')
 result = validator.validate_file('manufacturing.gg.yaml')
 ```
 
-See **[docs/PROFILE_VALIDATORS.md](docs/PROFILE_VALIDATORS.md)** for complete documentation.
+See **[Profile Validators Guide](docs/user-guide/profile-validators.md)** for complete documentation.
 
 ---
 
@@ -243,7 +310,7 @@ sd_jwt = issuer.create_sd_jwt(
 )
 ```
 
-See **[docs/SELECTIVE_DISCLOSURE.md](docs/SELECTIVE_DISCLOSURE.md)** for complete documentation and examples.
+See **[Selective Disclosure Guide](docs/user-guide/selective-disclosure.md)** for complete documentation and examples.
 
 **Note:** Requires optional `credentials` dependencies: `pip install genesisgraph[credentials]`
 
@@ -306,7 +373,7 @@ The updated specification (§9.2) defines three practical patterns for privacy-p
 
 **Example:** All levels can use transparency anchoring (see Level B and C examples)
 
-**Documentation:** See [docs/TRANSPARENCY_LOG.md](docs/TRANSPARENCY_LOG.md) for detailed usage and API reference.
+**Documentation:** See [Transparency Log Guide](docs/user-guide/transparency-log.md) for detailed usage and API reference.
 
 ## Disclosure Levels
 
@@ -627,7 +694,7 @@ GenesisGraph provides:
 | **Researcher** | "Figure reproducibility depends on goodwill" | "Attached `.gg.yaml` with exact software versions, parameters" |
 | **Auditor** | "Manual verification, slow, error-prone" | "Machine-verifiable proof, instant validation" |
 
-**See:** `USE_CASES.md` for complete examples with code.
+**See:** [Use Cases & Integration](docs/use-cases.md) for complete examples with code.
 
 ---
 
@@ -643,46 +710,55 @@ response = client.chat_completion(messages=[...])
 client.export_provenance("workflow.gg.yaml")
 ```
 
-**Details:** `USE_CASES.md` §AI Pipeline Provenance
+**Details:** [Use Cases](docs/use-cases.md) §AI Pipeline Provenance
 
 ---
 
-## 📚 Documentation Guide
+## 📚 Documentation Guide — Organized by Incremental Reveal
 
-| Document | Purpose | Audience | Time |
-|----------|---------|----------|------|
-| **QUICKSTART.md** | Simplest tutorial | Developers new to GenesisGraph | 5 min |
-| **USE_CASES.md** | Real integrations | Teams evaluating adoption | 15 min |
-| **FAQ.md** | Common objections | Decision-makers, skeptics | 10 min |
-| **MAIN_SPEC.md** | Complete standard | Implementers, auditors | 45 min |
-| **STRATEGIC_CONTEXT.md** | Big picture | Executives, investors | 20 min |
-| **CRITICAL_GAPS_ANALYSIS.md** | v1.0 roadmap & strategic gaps | Standards architects, contributors | 30 min |
+| Layer | Document | Purpose | Audience | Time |
+|-------|----------|---------|----------|------|
+| **1** | [Quickstart](docs/getting-started/quickstart.md) | Simplest tutorial | New developers | 5 min |
+| **1** | [Disclosure Levels](docs/user-guide/disclosure-levels.md) | Core A/B/C model | All users | 10 min |
+| **2** | [User Guide](docs/user-guide/overview.md) | Feature overview | Implementers | 15 min |
+| **2** | [Use Cases](docs/use-cases.md) | Real integrations | Teams evaluating adoption | 15 min |
+| **2** | [FAQ](docs/faq.md) | Common questions | Decision-makers | 10 min |
+| **3** | [Architecture](docs/developer-guide/architecture.md) | System design | Developers | 30 min |
+| **3** | [Main Spec](docs/specifications/main-spec.md) | Complete standard | Implementers, auditors | 45 min |
+| **4** | [Vision](docs/strategic/vision.md) | Why it matters | Executives, investors | 20 min |
+| **4** | [Roadmap](docs/strategic/roadmap.md) | Development plan | Contributors | 25 min |
+| **4** | [Critical Gaps](docs/strategic/critical-gaps.md) | Strategic analysis | Standards architects | 30 min |
 
 ---
 
-## 🛠️ Next Steps
+## 🛠️ Next Steps — Progressive Learning Paths
 
 ### For Developers
+Follow Layer 1 → 2 → 3 for systematic learning:
 
-1. Read `QUICKSTART.md` (5 minutes)
-2. Try simplest example (guitar hanger CAD export)
-3. Explore `examples/` directory
-4. Run verification scripts
-5. Integrate with your tool (see `USE_CASES.md` §Integration Patterns)
+1. **Start:** [Quickstart](docs/getting-started/quickstart.md) (5 min) - Guitar hanger CAD export example
+2. **Understand:** [Disclosure Levels](docs/user-guide/disclosure-levels.md) (10 min) - A/B/C model
+3. **Explore:** [Examples](docs/getting-started/examples.md) - Hands-on code samples
+4. **Integrate:** [Architecture](docs/developer-guide/architecture.md) - System integration patterns
+5. **Reference:** [SDK Quick Reference](docs/reference/sdk-quick-reference.md) - API lookup
 
 ### For Decision-Makers
+Evaluate business value quickly:
 
-1. Read `FAQ.md` (10 minutes) - addresses "Why not PROV-O?", "Do I need blockchain?"
-2. Review `USE_CASES.md` - see real-world integration examples
-3. Read `STRATEGIC_CONTEXT.md` (20 minutes) - understand adoption strategy, 5-year vision
-4. Evaluate business value for your domain (AI, manufacturing, research, etc.)
+1. **Overview:** Read the top of this README (2 min) - Understand the innovation
+2. **Questions:** [FAQ](docs/faq.md) (10 min) - "Why not PROV-O?", "Do I need blockchain?"
+3. **Examples:** [Use Cases](docs/use-cases.md) (15 min) - Real-world integrations
+4. **Strategy:** [Vision](docs/strategic/vision.md) (20 min) - Adoption strategy, 5-year plan
+5. **Planning:** [Roadmap](docs/strategic/roadmap.md) (25 min) - Current state & v1.0 timeline
 
 ### For Researchers
+Deep technical exploration:
 
-1. Read `spec/MAIN_SPEC.md` §9.2 - selective disclosure patterns (normative)
-2. Review examples: Level A (full), Level B (partial), Level C (sealed)
-3. Try verification scripts: `scripts/verify_sealed_subgraph.py`
-4. Explore schema: `schema/genesisgraph-core-v0.1.yaml`
+1. **Concept:** [Disclosure Levels](docs/user-guide/disclosure-levels.md) - Three-level model
+2. **Cryptography:** [Selective Disclosure](docs/user-guide/selective-disclosure.md) - SD-JWT, BBS+, ZKP
+3. **Specification:** [Main Spec](docs/specifications/main-spec.md) - §9.2 selective disclosure (normative)
+4. **Examples:** Review `examples/level-{a,b,c}-*.gg.yaml` files
+5. **Verification:** Try `scripts/verify_sealed_subgraph.py` and `verify_transparency_anchoring.py`
 
 ---
 
