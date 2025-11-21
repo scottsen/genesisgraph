@@ -46,7 +46,9 @@ repos:
       - id: mypy
         additional_dependencies:
           - types-pyyaml
-        args: ['--ignore-missing-imports']
+          - jsonschema
+          - cryptography
+        args: ['--config-file=pyproject.toml']
         exclude: ^tests/
 
   # Security checks
