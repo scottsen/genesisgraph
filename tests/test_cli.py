@@ -225,7 +225,7 @@ class TestFallbackCLI:
 
             assert exc_info.value.code == 0
             captured = capsys.readouterr()
-            assert '0.2.0' in captured.out
+            assert 'Spec version: 0.1.0' in captured.out  # Check spec version from document
             assert 'gg-ai-basic-v1' in captured.out
 
     def test_fallback_version(self, capsys):
@@ -238,7 +238,7 @@ class TestFallbackCLI:
             assert exc_info.value.code == 0
             captured = capsys.readouterr()
             assert 'GenesisGraph' in captured.out
-            assert '0.2.0' in captured.out
+            assert '0.3.0' in captured.out
 
     def test_fallback_no_args(self, capsys):
         """Test fallback CLI with no arguments"""

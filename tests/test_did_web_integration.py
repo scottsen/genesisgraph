@@ -150,7 +150,7 @@ class TestDIDWebIntegration:
         did_document = {
             "id": "did:web:hospital.example.com",
             "verificationMethod": [{
-                "id": "did:web:hospital.example.com#signing-key",
+                "id": "did:web:hospital.example.com#keys-1",
                 "type": "Ed25519VerificationKey2020",
                 "controller": "did:web:hospital.example.com",
                 "publicKeyBase58": base58_encode(test_public_key)
@@ -164,13 +164,13 @@ class TestDIDWebIntegration:
             # Mock ed25519 verification
             with patch('genesisgraph.validator.ed25519') as mock_ed25519:
                 mock_verify = Mock()
-                mock_ed25519.VerifyingKey.from_bytes.return_value = mock_verify
+                mock_ed25519.Ed25519PublicKey.from_public_bytes.return_value = mock_verify
 
                 validator = GenesisGraphValidator(verify_signatures=True)
 
                 attestation = {
                     'signer': 'did:web:hospital.example.com',
-                    'signature': base64.b64encode(b'fake_signature' * 8).decode(),
+                    'signature': f'ed25519:{base64.b64encode(b"fake_signature" * 8).decode()}',
                     'timestamp': '2025-10-15T14:30:00Z'
                 }
 
@@ -181,15 +181,19 @@ class TestDIDWebIntegration:
                     'outputs': []
                 }
 
-                context = {'operation_id': 'op_test_001'}
+                context = 'Operation op_test_001'
 
                 # This should resolve did:web and attempt verification
-                validator._verify_signature(attestation, operation_data, context)
+                errors = validator._verify_signature(attestation, operation_data, context)
+
+                # Print errors for debugging
+                if errors:
+                    print(f"Verification errors: {errors}")
 
                 # Verify DID was resolved
                 mock_get.assert_called_once()
                 # Verify ed25519 verification was attempted with correct key
-                mock_ed25519.VerifyingKey.from_bytes.assert_called_once_with(test_public_key)
+                mock_ed25519.Ed25519PublicKey.from_public_bytes.assert_called_once_with(test_public_key)
 
     def test_multiple_verification_methods(self, mock_http_response, base58_encode):
         """Test DID document with multiple keys, selecting specific one"""
