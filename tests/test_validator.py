@@ -658,6 +658,103 @@ class TestHashVerification:
             import shutil
             shutil.rmtree(temp_dir, ignore_errors=True)
 
+    def test_blake3_hash_verification_correct_hash(self):
+        """Test blake3 hash verification with correct hash"""
+        import tempfile
+        import os
+
+        try:
+            import blake3
+            BLAKE3_AVAILABLE = True
+        except ImportError:
+            BLAKE3_AVAILABLE = False
+            pytest.skip("blake3 not installed")
+
+        # Create a test file with known content
+        test_content = b'test content for blake3 hash verification'
+        expected_hash = blake3.blake3(test_content).hexdigest()
+
+        # Create temp directory to hold both files
+        temp_dir = tempfile.mkdtemp()
+        test_file = os.path.join(temp_dir, 'test_file.txt')
+        yaml_file = os.path.join(temp_dir, 'test.yaml')
+
+        try:
+            # Write test file
+            with open(test_file, 'wb') as f:
+                f.write(test_content)
+
+            # Write yaml file
+            with open(yaml_file, 'w') as f:
+                f.write('dummy')
+
+            data = {
+                'spec_version': '0.1.0',
+                'entities': [
+                    {
+                        'id': 'test',
+                        'type': 'Dataset',
+                        'version': '1.0',
+                        'file': 'test_file.txt',
+                        'hash': f'blake3:{expected_hash}'
+                    }
+                ]
+            }
+
+            validator = GenesisGraphValidator()
+            result = validator.validate(data, file_path=yaml_file)
+
+            assert result.is_valid, f"Validation failed: {result.errors}"
+        finally:
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
+    def test_blake3_hash_verification_without_library(self):
+        """Test blake3 hash verification when library not installed"""
+        import tempfile
+        import os
+        from unittest.mock import patch
+
+        # Create temp directory to hold both files
+        temp_dir = tempfile.mkdtemp()
+        test_file = os.path.join(temp_dir, 'test_file.txt')
+        yaml_file = os.path.join(temp_dir, 'test.yaml')
+
+        try:
+            # Write test file
+            with open(test_file, 'wb') as f:
+                f.write(b'test content')
+
+            # Write yaml file
+            with open(yaml_file, 'w') as f:
+                f.write('dummy')
+
+            data = {
+                'spec_version': '0.1.0',
+                'entities': [
+                    {
+                        'id': 'test',
+                        'type': 'Dataset',
+                        'version': '1.0',
+                        'file': 'test_file.txt',
+                        'hash': 'blake3:' + 'a' * 64
+                    }
+                ]
+            }
+
+            # Mock BLAKE3_AVAILABLE to be False
+            with patch('genesisgraph.validator.BLAKE3_AVAILABLE', False):
+                validator = GenesisGraphValidator()
+                result = validator.validate(data, file_path=yaml_file)
+
+            # Should fail with helpful error message
+            assert not result.is_valid
+            assert any('blake3' in error.lower() for error in result.errors)
+            assert any('pip install genesisgraph[blake3]' in error for error in result.errors)
+        finally:
+            import shutil
+            shutil.rmtree(temp_dir, ignore_errors=True)
+
 
 class TestExampleFiles:
     """Test validation of example files"""
