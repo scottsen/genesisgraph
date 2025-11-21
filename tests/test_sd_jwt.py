@@ -364,5 +364,127 @@ class TestSDJWTSecurity:
         assert hash1 != hash2  # Salts prevent correlation
 
 
+class TestSDJWTEdgeCases:
+    """Test edge cases and error handling"""
+
+    def test_issuer_with_provided_private_key(self):
+        """Test creating issuer with provided private key"""
+        # Generate a key and export as PEM
+        key = jwk.JWK.generate(kty='OKP', crv='Ed25519')
+        private_key_pem = key.export_to_pem(private_key=True, password=None).decode()
+
+        # Create issuer with this key
+        issuer = SDJWTIssuer(issuer_did="did:web:example.com", private_key_pem=private_key_pem)
+        assert issuer.private_key is not None
+
+        # Should be able to create SD-JWT
+        claims = {"test": "value"}
+        sd_jwt = issuer.create_sd_jwt(claims=claims)
+        assert "sd_jwt" in sd_jwt
+
+    def test_create_sd_jwt_with_additional_headers(self):
+        """Test creating SD-JWT with additional headers"""
+        issuer = SDJWTIssuer(issuer_did="did:web:example.com")
+
+        claims = {"temperature": 0.25}
+        additional_headers = {
+            "kid": "key-1",
+            "custom_field": "custom_value"
+        }
+
+        sd_jwt = issuer.create_sd_jwt(
+            claims=claims,
+            selectively_disclosable=["temperature"],
+            additional_headers=additional_headers
+        )
+
+        assert "sd_jwt" in sd_jwt
+        # Headers are included in the JWT token itself
+
+    def test_create_sd_jwt_with_none_selectively_disclosable(self):
+        """Test creating SD-JWT with None as selectively_disclosable"""
+        issuer = SDJWTIssuer(issuer_did="did:web:example.com")
+
+        claims = {"temperature": 0.25}
+
+        # Pass None explicitly (though default is None)
+        sd_jwt = issuer.create_sd_jwt(
+            claims=claims,
+            selectively_disclosable=None
+        )
+
+        assert "sd_jwt" in sd_jwt
+        assert len(sd_jwt["disclosures"]) == 0
+
+    def test_verify_sd_jwt_missing_token(self):
+        """Test verification fails when sd_jwt token is missing"""
+        verifier = SDJWTVerifier()
+
+        # Create malformed SD-JWT data without token
+        malformed_data = {
+            "issuer": "did:web:example.com",
+            "disclosures": []
+            # Missing "sd_jwt" key
+        }
+
+        result = verifier.verify_sd_jwt(sd_jwt_data=malformed_data)
+
+        assert result["valid"] is False
+        assert "Missing sd_jwt token" in str(result["errors"])
+
+    def test_verify_sd_jwt_with_public_key(self):
+        """Test verification with public key"""
+        # Create issuer and get keys
+        issuer = SDJWTIssuer(issuer_did="did:web:example.com")
+        public_key_pem = issuer.private_key.export_to_pem().decode()
+
+        claims = {"temperature": 0.25}
+        sd_jwt = issuer.create_sd_jwt(claims=claims, selectively_disclosable=["temperature"])
+
+        # Verify with public key
+        verifier = SDJWTVerifier()
+        result = verifier.verify_sd_jwt(
+            sd_jwt_data=sd_jwt,
+            disclosed_claims=["temperature"],
+            public_key_pem=public_key_pem
+        )
+
+        assert result["valid"] is True
+        assert "temperature" in result["claims"]
+
+    def test_verify_sd_jwt_future_issued(self):
+        """Test that JWTs issued in the future are rejected"""
+        issuer = SDJWTIssuer(issuer_did="did:web:example.com")
+        claims = {"temperature": 0.25}
+
+        sd_jwt = issuer.create_sd_jwt(claims=claims)
+
+        verifier = SDJWTVerifier()
+        # Use current_time far in the past to make JWT appear issued in future
+        result = verifier.verify_sd_jwt(
+            sd_jwt_data=sd_jwt,
+            current_time=int(time.time()) - 3700  # 1 hour ago
+        )
+
+        assert result["valid"] is False
+        assert "future" in str(result.get("errors", [])).lower()
+
+    def test_verify_sd_jwt_general_exception(self):
+        """Test handling of general exceptions during verification"""
+        verifier = SDJWTVerifier()
+
+        # Pass completely invalid data to trigger exception
+        invalid_data = {
+            "sd_jwt": "not.a.valid.jwt.token.at.all",
+            "disclosures": [],
+            "issuer": "did:web:example.com"
+        }
+
+        result = verifier.verify_sd_jwt(sd_jwt_data=invalid_data)
+
+        assert result["valid"] is False
+        assert "Verification failed" in str(result.get("errors", []))
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
