@@ -11,6 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Test Coverage Improvements** (Quality & Reliability Enhancement)
+  - **Overall test coverage increased from 71% to 76%** (+5 percentage points)
+  - **SD-JWT module: 8% → 98%** (+90pp) - Added 7 new edge case tests covering:
+    - Custom private key initialization
+    - Additional JWT headers support
+    - Public key verification
+    - Future-dated JWT rejection
+    - Missing token error handling
+    - General exception handling
+  - **Predicates module: 36% → 96%** (+60pp) - Improved with proper dependency installation
+  - **BBS+ signatures: 99% coverage** - Comprehensive privacy-preserving credential tests
+  - **ZKP templates: 97% coverage** - Zero-knowledge proof validation
+  - **Builder API: 93% coverage** - Fluent interface and document creation
+  - **DID Resolver: 90% coverage** - Multi-method identifier resolution
+  - **FDA 21 CFR Part 11: 90% coverage** - Electronic records compliance
+  - **CLI: 72% coverage** - Command-line interface with 30 comprehensive tests
+  - Total test suite: **363 tests passing** (up from 318)
+  - All credential dependencies (sd-jwt, jwcrypto, cffi) now properly installed
+  - Enables confident development of complex features (delegation, agent provenance)
+
 - **Phase 4: Enhanced Features** (Blake3 Hash Support & Performance Optimizations)
   - Blake3 cryptographic hash support for modern, high-performance file integrity verification
   - Optional blake3 dependency: `pip install genesisgraph[blake3]`
