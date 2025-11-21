@@ -45,6 +45,23 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 
 **Want to integrate?** See `USE_CASES.md` §Integration Patterns for wrapper/native/post-hoc approaches.
 
+**Explore documentation incrementally:** Use our Progressive Reveal CLI to understand docs at your own pace:
+
+```bash
+# Install the tool
+cd tools/progressive-reveal-cli && pip install -e .
+
+# Quick exploration
+./scripts/explore_docs.sh --level 0 --category essential
+
+# Or explore specific docs
+reveal README.md --level 1          # See structure
+reveal QUICKSTART.md --level 2      # Preview content
+reveal FAQ.md --level 3 --grep "blockchain"  # Search topics
+```
+
+**See [DOCUMENT_EXPLORER_GUIDE.md](DOCUMENT_EXPLORER_GUIDE.md) for complete documentation exploration guide.**
+
 ---
 
 ## 📚 SDK Libraries
