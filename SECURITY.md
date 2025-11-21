@@ -341,6 +341,8 @@ GenesisGraph's security relies on the following cryptographic assumptions:
 
 ## Known Limitations
 
+**For comprehensive analysis of architectural limitations and fundamental tradeoffs, see [CRITICAL_GAPS_ANALYSIS.md § Difficulty Analysis](CRITICAL_GAPS_ANALYSIS.md#difficulty-analysis-what-cant-be-fully-plugged).**
+
 ### Current Version (v0.1.0)
 
 1. **Signature verification incomplete**
