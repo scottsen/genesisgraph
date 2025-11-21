@@ -108,58 +108,58 @@ plugins:
       enable_creation_date: true
       type: timeago
 
-# Navigation structure
+# Navigation structure - Organized by Incremental Reveal Principles
+# Layer 1: Essential basics (what, why, how to start)
+# Layer 2: User guidance (features and how to use them)
+# Layer 3: Technical depth (architecture, specifications, reference)
+# Layer 4: Strategic context (vision, roadmap, planning)
+
 nav:
   - Home: index.md
-  
+
+  # Layer 1: Getting Started - Simplest entry point
   - Getting Started:
       - Installation: getting-started/installation.md
-      - Quickstart: getting-started/quickstart.md
+      - Quickstart (5 min): getting-started/quickstart.md
       - Examples: getting-started/examples.md
-  
+
+  # Layer 2: User Guide - Progressive feature depth
   - User Guide:
       - Overview: user-guide/overview.md
-      - Validation: user-guide/validation.md
-      - CLI Usage: user-guide/cli.md
-      - Disclosure Levels: user-guide/disclosure-levels.md
+      - Disclosure Levels (A/B/C): user-guide/disclosure-levels.md
       - DID & Identity: user-guide/did-web-guide.md
-      - Transparency Logs: user-guide/transparency-log.md
       - Selective Disclosure: user-guide/selective-disclosure.md
+      - Transparency Logs: user-guide/transparency-log.md
       - Profile Validators: user-guide/profile-validators.md
-  
-  - API Reference:
-      - Validator: api-reference/validator.md
-      - CLI: api-reference/cli.md
-      - DID Resolver: api-reference/did-resolver.md
-      - Transparency Log: api-reference/transparency-log.md
-      - Errors: api-reference/errors.md
-      - SDK (Python): api-reference/python-sdk.md
-      - SDK (JavaScript): api-reference/javascript-sdk.md
-  
+
+  # Use Cases - Real-world applications
+  - Use Cases & Integration:
+      - Overview: use-cases.md
+      - FAQ: faq.md
+
+  # Layer 3: Technical Depth - Architecture and Implementation
   - Developer Guide:
       - Architecture: developer-guide/architecture.md
       - Contributing: developer-guide/contributing.md
-      - Testing: developer-guide/testing.md
       - Security: developer-guide/security.md
       - Troubleshooting: developer-guide/troubleshooting.md
-  
+
+  # Reference - Quick lookup for developers
+  - Reference:
+      - SDK Development Guide: reference/sdk-development-guide.md
+      - SDK Quick Reference: reference/sdk-quick-reference.md
+      - Implementation Status: reference/implementation-summary.md
+
+  # Specifications - Formal definitions
   - Specifications:
-      - Main Spec: specifications/main-spec.md
-      - Selective Disclosure: specifications/selective-disclosure.md
+      - Main Specification: specifications/main-spec.md
       - ZKP Templates: specifications/zkp-templates.md
-  
-  - Use Cases:
-      - Overview: use-cases/overview.md
-      - AI Pipelines: use-cases/ai-pipelines.md
-      - Manufacturing: use-cases/manufacturing.md
-      - Scientific Research: use-cases/scientific-research.md
-  
+
+  # Layer 4: Strategic Context - Vision and planning
   - Strategic Context:
-      - Vision: strategic/vision.md
-      - Critical Gaps: strategic/critical-gaps.md
+      - Vision & Why It Matters: strategic/vision.md
       - Roadmap: strategic/roadmap.md
-  
-  - FAQ: faq.md
+      - Critical Gaps Analysis: strategic/critical-gaps.md
 
 # Extra settings
 extra:

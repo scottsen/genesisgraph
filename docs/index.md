@@ -20,41 +20,48 @@ GenesisGraph provides verifiable provenance for:
 ✅ **Industry Profiles** - AI/ML (FDA 21 CFR), Manufacturing (ISO 9001)  
 ✅ **Progressive Trust** - Start simple, add cryptography as needed  
 
-## Quick Links
+## Quick Links — Organized by Incremental Reveal
 
 <div class="grid cards" markdown>
 
--   :material-clock-fast:{ .lg .middle } __5-Minute Quickstart__
+-   :material-clock-fast:{ .lg .middle } __Layer 1: Getting Started__
 
     ---
 
-    Get started with a simple example and validate your first document
+    5-minute tutorial and understand the A/B/C disclosure model
 
-    [:octicons-arrow-right-24: Quickstart Guide](getting-started/quickstart.md)
+    [:octicons-arrow-right-24: Quickstart](getting-started/quickstart.md)
+    [:octicons-arrow-right-24: Disclosure Levels](user-guide/disclosure-levels.md)
 
--   :fontawesome-brands-python:{ .lg .middle } __API Reference__
-
-    ---
-
-    Complete Python SDK documentation with examples
-
-    [:octicons-arrow-right-24: API Docs](api-reference/validator.md)
-
--   :material-book-open-variant:{ .lg .middle } __User Guide__
+-   :material-book-open-variant:{ .lg .middle } __Layer 2: User Guide__
 
     ---
 
-    Learn about validation, disclosure levels, and cryptographic features
+    Learn features, see examples, and find answers
 
     [:octicons-arrow-right-24: User Guide](user-guide/overview.md)
+    [:octicons-arrow-right-24: Use Cases](use-cases.md)
+    [:octicons-arrow-right-24: FAQ](faq.md)
 
--   :material-code-braces:{ .lg .middle } __Developer Guide__
+-   :material-code-braces:{ .lg .middle } __Layer 3: Technical Depth__
 
     ---
 
-    Architecture, testing, and contribution guidelines
+    Architecture, specifications, and SDK reference
 
-    [:octicons-arrow-right-24: Developer Guide](developer-guide/architecture.md)
+    [:octicons-arrow-right-24: Architecture](developer-guide/architecture.md)
+    [:octicons-arrow-right-24: Main Spec](specifications/main-spec.md)
+    [:octicons-arrow-right-24: SDK Reference](reference/sdk-quick-reference.md)
+
+-   :material-strategy:{ .lg .middle } __Layer 4: Strategic Context__
+
+    ---
+
+    Vision, roadmap, and planning for decision-makers
+
+    [:octicons-arrow-right-24: Vision](strategic/vision.md)
+    [:octicons-arrow-right-24: Roadmap](strategic/roadmap.md)
+    [:octicons-arrow-right-24: Critical Gaps](strategic/critical-gaps.md)
 
 </div>
 
@@ -123,7 +130,7 @@ gg validate workflow.gg.yaml
 # ✓ Validation PASSED
 ```
 
-## Use Cases
+## Use Cases by Industry
 
 <div class="grid cards" markdown>
 
@@ -133,7 +140,7 @@ gg validate workflow.gg.yaml
 
     Prove how AI models generated outputs, with selective disclosure of prompts
 
-    [:octicons-arrow-right-24: AI Use Cases](use-cases/ai-pipelines.md)
+    [:octicons-arrow-right-24: See AI Examples](use-cases.md#ai-pipelines)
 
 -   :material-cube-outline:{ .lg .middle } __Manufacturing__
 
@@ -141,7 +148,7 @@ gg validate workflow.gg.yaml
 
     ISO 9001 compliance with sealed CAM toolpaths
 
-    [:octicons-arrow-right-24: Manufacturing](use-cases/manufacturing.md)
+    [:octicons-arrow-right-24: See Manufacturing](use-cases.md#manufacturing)
 
 -   :material-flask:{ .lg .middle } __Scientific Research__
 
@@ -149,9 +156,11 @@ gg validate workflow.gg.yaml
 
     Reproducible research with full parameter disclosure
 
-    [:octicons-arrow-right-24: Science](use-cases/scientific-research.md)
+    [:octicons-arrow-right-24: See Research](use-cases.md#scientific-research)
 
 </div>
+
+**See the complete [Use Cases & Integration Guide](use-cases.md) for code examples and integration patterns.**
 
 ## Community & Support
 

@@ -37,37 +37,37 @@ reveal README.md --level 3 --page-size 50
 **2. Get Started in 5 Minutes**
 ```bash
 # See structure
-reveal QUICKSTART.md --level 1
+reveal docs/getting-started/quickstart.md --level 1
 
 # Preview steps
-reveal QUICKSTART.md --level 2
+reveal docs/getting-started/quickstart.md --level 2
 
 # Follow along
-reveal QUICKSTART.md --level 3
+reveal docs/getting-started/quickstart.md --level 3
 ```
 
 **3. Explore Real Use Cases**
 ```bash
 # See available use cases
-reveal USE_CASES.md --level 1
+reveal docs/use-cases.md --level 1
 
 # Find your industry
-reveal USE_CASES.md --level 2 --grep "manufacturing|AI|science"
+reveal docs/use-cases.md --level 2 --grep "manufacturing|AI|science"
 
 # Deep dive
-reveal USE_CASES.md --level 3 --grep "manufacturing" --context 5
+reveal docs/use-cases.md --level 3 --grep "manufacturing" --context 5
 ```
 
 **4. Common Questions**
 ```bash
 # See all FAQ topics
-reveal FAQ.md --level 1
+reveal docs/faq.md --level 1
 
 # Find specific questions
-reveal FAQ.md --level 2 --grep "blockchain|PROV-O|performance"
+reveal docs/faq.md --level 2 --grep "blockchain|PROV-O|performance"
 
 # Read answers
-reveal FAQ.md --level 3 --grep "Why not blockchain" --context 10
+reveal docs/faq.md --level 3 --grep "Why not blockchain" --context 10
 ```
 
 ---
@@ -89,10 +89,10 @@ reveal docs/developer-guide/architecture.md --level 3
 **6. SDK Documentation**
 ```bash
 # SDK guide structure
-reveal SDK-DEVELOPMENT-GUIDE.md --level 1
+reveal docs/reference/sdk-development-guide.md --level 1
 
 # Quick reference
-reveal SDK-QUICK-REFERENCE.md --level 2
+reveal docs/reference/sdk-quick-reference.md --level 2
 
 # Python examples
 reveal sdks/python/README.md --level 2
@@ -103,26 +103,29 @@ reveal sdks/javascript/README.md --level 2
 
 **7. Feature Guides**
 ```bash
+# Disclosure levels (CORE CONCEPT)
+reveal docs/user-guide/disclosure-levels.md --level 2
+
 # Enterprise identity (did:web)
-reveal docs/DID_WEB_GUIDE.md --level 2
+reveal docs/user-guide/did-web-guide.md --level 2
 
 # Privacy patterns
-reveal docs/SELECTIVE_DISCLOSURE.md --level 2
+reveal docs/user-guide/selective-disclosure.md --level 2
 
 # Transparency logs
-reveal docs/TRANSPARENCY_LOG.md --level 2
+reveal docs/user-guide/transparency-log.md --level 2
 
 # Zero-knowledge proofs
-reveal docs/ZKP_TEMPLATES.md --level 2
+reveal docs/specifications/zkp-templates.md --level 2
 
 # Industry compliance
-reveal docs/PROFILE_VALIDATORS.md --level 2
+reveal docs/user-guide/profile-validators.md --level 2
 ```
 
 **8. Security**
 ```bash
 # Security considerations
-reveal SECURITY.md --level 1
+reveal docs/developer-guide/security.md --level 1
 
 # Audit findings
 reveal SECURITY_AUDIT_FINDINGS.md --level 1 --grep "CRITICAL|HIGH"
@@ -138,37 +141,37 @@ reveal SECURITY_AUDIT_FINDINGS.md --level 3
 **9. Project Vision**
 ```bash
 # Strategic context
-reveal STRATEGIC_CONTEXT.md --level 1
+reveal docs/strategic/vision.md --level 1
 
 # Vision and roadmap
-reveal STRATEGIC_CONTEXT.md --level 2
+reveal docs/strategic/vision.md --level 2
 
 # 5-year plan
-reveal STRATEGIC_CONTEXT.md --level 3 --grep "adoption|market"
+reveal docs/strategic/vision.md --level 3 --grep "adoption|market"
 ```
 
 **10. Current Status & Roadmap**
 ```bash
 # What's implemented
-reveal ROADMAP.md --level 1
+reveal docs/strategic/roadmap.md --level 1
 
 # Current gaps
-reveal ROADMAP.md --level 2 --grep "v1.0|milestone"
+reveal docs/strategic/roadmap.md --level 2 --grep "v1.0|milestone"
 
 # Full roadmap
-reveal ROADMAP.md --level 3
+reveal docs/strategic/roadmap.md --level 3
 ```
 
 **11. Critical Analysis**
 ```bash
 # All gaps overview
-reveal CRITICAL_GAPS_ANALYSIS.md --level 1
+reveal docs/strategic/critical-gaps.md --level 1
 
 # Critical gaps only
-reveal CRITICAL_GAPS_ANALYSIS.md --level 2 --grep "CRITICAL"
+reveal docs/strategic/critical-gaps.md --level 2 --grep "CRITICAL"
 
 # Difficulty analysis
-reveal CRITICAL_GAPS_ANALYSIS.md --level 3 --grep "Exceptionally Hard" --context 10
+reveal docs/strategic/critical-gaps.md --level 3 --grep "Exceptionally Hard" --context 10
 ```
 
 ---
@@ -178,22 +181,22 @@ reveal CRITICAL_GAPS_ANALYSIS.md --level 3 --grep "Exceptionally Hard" --context
 **12. Main Specification**
 ```bash
 # Spec metadata (886 lines!)
-reveal spec/MAIN_SPEC.md
+reveal docs/specifications/main-spec.md
 
 # Spec structure
-reveal spec/MAIN_SPEC.md --level 1
+reveal docs/specifications/main-spec.md --level 1
 
 # Specific sections
-reveal spec/MAIN_SPEC.md --level 2 --grep "attestation|verification|disclosure"
+reveal docs/specifications/main-spec.md --level 2 --grep "attestation|verification|disclosure"
 
 # Deep dive
-reveal spec/MAIN_SPEC.md --level 3 --grep "cryptographic" --context 5
+reveal docs/specifications/main-spec.md --level 3 --grep "cryptographic" --context 5
 ```
 
 **13. Implementation Details**
 ```bash
 # Implementation summary
-reveal IMPLEMENTATION_SUMMARY.md --level 2
+reveal docs/reference/implementation-summary.md --level 2
 
 # Change history
 reveal CHANGELOG.md --level 2
@@ -217,8 +220,8 @@ done
 
 ```bash
 # Compare SDK documentation
-reveal SDK-DEVELOPMENT-GUIDE.md --level 1 > /tmp/sdk-dev.txt
-reveal SDK-QUICK-REFERENCE.md --level 1 > /tmp/sdk-ref.txt
+reveal docs/reference/sdk-development-guide.md --level 1 > /tmp/sdk-dev.txt
+reveal docs/reference/sdk-quick-reference.md --level 1 > /tmp/sdk-ref.txt
 diff /tmp/sdk-dev.txt /tmp/sdk-ref.txt
 ```
 
@@ -229,7 +232,7 @@ diff /tmp/sdk-dev.txt /tmp/sdk-ref.txt
 reveal README.md --level 3 --grep "```yaml" --context 10
 
 # Search for Python code
-reveal SDK-DEVELOPMENT-GUIDE.md --level 3 --grep "def |class " --context 3
+reveal docs/reference/sdk-development-guide.md --level 3 --grep "def |class " --context 3
 ```
 
 ### Explore by File Size
@@ -251,78 +254,92 @@ done | sort -t: -k2 -n
 ### Workflow 1: "I Need to Integrate GenesisGraph"
 
 1. `reveal README.md --level 2` - Understand the basics
-2. `reveal QUICKSTART.md --level 3` - Follow tutorial
-3. `reveal USE_CASES.md --level 3 --grep "your-industry"` - See relevant examples
-4. `reveal SDK-QUICK-REFERENCE.md --level 2` - API overview
+2. `reveal docs/getting-started/quickstart.md --level 3` - Follow tutorial
+3. `reveal docs/use-cases.md --level 3 --grep "your-industry"` - See relevant examples
+4. `reveal docs/reference/sdk-quick-reference.md --level 2` - API overview
 5. `reveal docs/developer-guide/troubleshooting.md --level 2` - Common issues
 
 ### Workflow 2: "I'm Evaluating GenesisGraph"
 
 1. `reveal README.md --level 1` - High-level structure
-2. `reveal FAQ.md --level 3 --grep "why not|vs|comparison"` - Compare alternatives
-3. `reveal STRATEGIC_CONTEXT.md --level 2` - Vision and maturity
-4. `reveal ROADMAP.md --level 2` - Implementation status
+2. `reveal docs/faq.md --level 3 --grep "why not|vs|comparison"` - Compare alternatives
+3. `reveal docs/strategic/vision.md --level 2` - Vision and maturity
+4. `reveal docs/strategic/roadmap.md --level 2` - Implementation status
 5. `reveal SECURITY_AUDIT_FINDINGS.md --level 1` - Risk assessment
 
 ### Workflow 3: "I Want to Contribute"
 
-1. `reveal CONTRIBUTING.md --level 3` - Guidelines
-2. `reveal ROADMAP.md --level 2 --grep "TODO|future|planned"` - Open work
-3. `reveal CRITICAL_GAPS_ANALYSIS.md --level 2` - High-impact areas
+1. `reveal docs/developer-guide/contributing.md --level 3` - Guidelines
+2. `reveal docs/strategic/roadmap.md --level 2 --grep "TODO|future|planned"` - Open work
+3. `reveal docs/strategic/critical-gaps.md --level 2` - High-impact areas
 4. `reveal docs/developer-guide/architecture.md --level 2` - System design
-5. `reveal SDK-DEVELOPMENT-GUIDE.md --level 3` - Implementation patterns
+5. `reveal docs/reference/sdk-development-guide.md --level 3` - Implementation patterns
 
 ### Workflow 4: "I'm Writing a Paper"
 
-1. `reveal spec/MAIN_SPEC.md --level 1` - Specification structure
+1. `reveal docs/specifications/main-spec.md --level 1` - Specification structure
 2. `reveal README.md --level 3 --grep "citation|reference"` - How to cite
-3. `reveal STRATEGIC_CONTEXT.md --level 3` - Problem space analysis
-4. `reveal USE_CASES.md --level 3` - Application domains
-5. `reveal CRITICAL_GAPS_ANALYSIS.md --level 3` - Future research directions
+3. `reveal docs/strategic/vision.md --level 3` - Problem space analysis
+4. `reveal docs/use-cases.md --level 3` - Application domains
+5. `reveal docs/strategic/critical-gaps.md --level 3` - Future research directions
 
 ---
 
-## Document Inventory
+## Document Inventory — Organized by Layer
 
-### Root-Level Documents (16 files)
+### Layer 1: Getting Started
 
-| Priority | Document | Purpose | Lines | Audience |
-|----------|----------|---------|-------|----------|
-| ⭐⭐⭐ | README.md | Main entry point | 704 | Everyone |
-| ⭐⭐⭐ | QUICKSTART.md | 5-minute tutorial | 258 | New users |
-| ⭐⭐⭐ | FAQ.md | Common questions | 551 | Evaluators |
-| ⭐⭐ | USE_CASES.md | Integration patterns | 467 | Developers |
-| ⭐⭐ | ROADMAP.md | Project status | 699 | Contributors |
-| ⭐⭐ | SECURITY.md | Security model | 440 | Enterprise |
-| ⭐ | STRATEGIC_CONTEXT.md | Vision & strategy | 372 | Decision-makers |
-| ⭐ | CRITICAL_GAPS_ANALYSIS.md | Deep analysis | 1574 | Architects |
-| ⭐ | IMPROVEMENT_PLAN.md | Tactical roadmap | 1131 | Core team |
-| • | CONTRIBUTING.md | Contributor guide | 200 | Contributors |
-| • | CHANGELOG.md | Release history | 352 | All users |
-| • | SECURITY_AUDIT_FINDINGS.md | Audit results | 583 | Security team |
-| • | SDK-DEVELOPMENT-GUIDE.md | SDK architecture | 1045 | SDK devs |
-| • | SDK-QUICK-REFERENCE.md | API reference | 350 | SDK users |
-| • | IMPLEMENTATION_SUMMARY.md | Status summary | 320 | Trackers |
-| • | claude.md | Claude config | 122 | Claude users |
+| Priority | Document | Purpose | Audience |
+|----------|----------|---------|----------|
+| ⭐⭐⭐ | docs/getting-started/installation.md | Installation | New users |
+| ⭐⭐⭐ | docs/getting-started/quickstart.md | 5-minute tutorial | New users |
+| ⭐⭐⭐ | docs/getting-started/examples.md | Hands-on examples | Developers |
+| ⭐⭐⭐ | docs/user-guide/disclosure-levels.md | **Core A/B/C model** | **Everyone** |
 
-### Feature Documentation (/docs - 8 files)
+### Layer 2: User Guidance
 
-| Document | Purpose | Lines |
-|----------|---------|-------|
-| DID_WEB_GUIDE.md | Enterprise identity | 382 |
-| SELECTIVE_DISCLOSURE.md | Privacy patterns | 413 |
-| TRANSPARENCY_LOG.md | Audit trails | 351 |
-| PROFILE_VALIDATORS.md | Industry compliance | 321 |
-| ZKP_TEMPLATES.md | Zero-knowledge proofs | 411 |
-| developer-guide/architecture.md | System design | 666 |
-| developer-guide/troubleshooting.md | Common issues | 267 |
-| getting-started/installation.md | Installation | 78 |
+| Priority | Document | Purpose | Audience |
+|----------|----------|---------|----------|
+| ⭐⭐⭐ | docs/user-guide/overview.md | Feature landscape | Implementers |
+| ⭐⭐ | docs/user-guide/did-web-guide.md | Enterprise identity | Enterprise users |
+| ⭐⭐ | docs/user-guide/selective-disclosure.md | Cryptographic privacy | Advanced users |
+| ⭐⭐ | docs/user-guide/transparency-log.md | Audit trails | Compliance teams |
+| ⭐⭐ | docs/user-guide/profile-validators.md | Industry compliance | Regulated industries |
+| ⭐⭐⭐ | docs/use-cases.md | Real-world integrations | Developers |
+| ⭐⭐⭐ | docs/faq.md | Common questions | Evaluators |
 
-### Specification (/spec - 1 file)
+### Layer 3: Technical Depth
 
-| Document | Purpose | Lines |
-|----------|---------|-------|
-| MAIN_SPEC.md | Complete formal spec | 886 |
+| Priority | Document | Purpose | Audience |
+|----------|----------|---------|----------|
+| ⭐⭐ | docs/developer-guide/architecture.md | System design | Developers |
+| • | docs/developer-guide/contributing.md | Contributor guide | Contributors |
+| ⭐⭐ | docs/developer-guide/security.md | Security model | Enterprise |
+| • | docs/developer-guide/troubleshooting.md | Common issues | Support |
+| ⭐⭐ | docs/reference/sdk-development-guide.md | SDK architecture | SDK developers |
+| ⭐⭐ | docs/reference/sdk-quick-reference.md | API reference | SDK users |
+| • | docs/reference/implementation-summary.md | Status summary | Trackers |
+| ⭐⭐⭐ | docs/specifications/main-spec.md | Formal specification | Implementers |
+| ⭐ | docs/specifications/zkp-templates.md | Zero-knowledge proofs | Researchers |
+
+### Layer 4: Strategic Context
+
+| Priority | Document | Purpose | Audience |
+|----------|----------|---------|----------|
+| ⭐ | docs/strategic/vision.md | Vision & strategy | Decision-makers |
+| ⭐⭐ | docs/strategic/roadmap.md | Development plan | Contributors |
+| ⭐ | docs/strategic/critical-gaps.md | Strategic analysis | Architects |
+
+### Root-Level Files
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| README.md | **Main entry point** | **Everyone** |
+| CHANGELOG.md | Release history | All users |
+| SECURITY_AUDIT_FINDINGS.md | Audit results | Security team |
+| IMPROVEMENT_PLAN.md | Historical tactical plan | Core team |
+| claude.md | Claude Code config | Claude users |
+| DOCS_NAVIGATION.md | Documentation map | All users |
 
 ---
 
@@ -341,13 +358,13 @@ When working with Claude Code, use progressive reveal to:
 # Task: "Update security documentation"
 
 # Step 1: Understand current security docs
-reveal SECURITY.md --level 1
+reveal docs/developer-guide/security.md --level 1
 
 # Step 2: Find relevant sections
-reveal SECURITY.md --level 2 --grep "threat|attack"
+reveal docs/developer-guide/security.md --level 2 --grep "threat|attack"
 
 # Step 3: Read specific sections
-reveal SECURITY.md --level 3 --grep "threat model" --context 20
+reveal docs/developer-guide/security.md --level 3 --grep "threat model" --context 20
 
 # Step 4: Check related docs
 reveal SECURITY_AUDIT_FINDINGS.md --level 2 --grep "CRITICAL"
