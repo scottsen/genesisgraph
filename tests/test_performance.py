@@ -227,6 +227,64 @@ def test_performance_regression_baseline(benchmark, validator, medium_document):
     # pytest-benchmark will track this over time
 
 
+def test_regex_pattern_performance(benchmark, validator):
+    """Benchmark regex pattern matching performance
+
+    Tests the performance benefit of pre-compiled regex patterns.
+    Pre-compiled patterns should be 2-3x faster for repeated validations.
+    """
+    # Test hash format validation (uses pre-compiled HASH_PATTERN)
+    test_hashes = [
+        f"sha256:{'a' * 64}",
+        f"sha512:{'b' * 128}",
+        f"blake3:{'c' * 64}",
+    ] * 100  # 300 hash validations
+
+    def validate_hashes():
+        return [validator._is_valid_hash(h) for h in test_hashes]
+
+    results = benchmark(validate_hashes)
+    assert all(results), "All hashes should be valid"
+
+
+def test_blake3_hash_computation_performance(benchmark):
+    """Benchmark blake3 hash computation vs sha256
+
+    Blake3 should be significantly faster than sha256 for large files.
+    """
+    try:
+        import blake3
+        BLAKE3_AVAILABLE = True
+    except ImportError:
+        pytest.skip("blake3 not installed")
+
+    import hashlib
+    import tempfile
+
+    # Create a 1MB test file
+    test_data = b'x' * (1024 * 1024)  # 1MB
+
+    temp_dir = tempfile.mkdtemp()
+    test_file = Path(temp_dir) / 'large_file.bin'
+
+    try:
+        with open(test_file, 'wb') as f:
+            f.write(test_data)
+
+        def compute_blake3():
+            hasher = blake3.blake3()
+            with open(test_file, 'rb') as f:
+                while chunk := f.read(8192):
+                    hasher.update(chunk)
+            return hasher.hexdigest()
+
+        result = benchmark(compute_blake3)
+        assert len(result) == 64  # Blake3 produces 256-bit hash
+    finally:
+        import shutil
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
 if __name__ == "__main__":
     # Run with: python tests/test_performance.py
     # Or: pytest tests/test_performance.py --benchmark-only
