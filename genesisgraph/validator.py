@@ -496,8 +496,16 @@ class GenesisGraphValidator:
         if not isinstance(signature, str):
             return False
 
-        # Format: algorithm:base64_or_hex_data
-        # Supported: ed25519, ecdsa, rsa
+        # Signature format: <algorithm>:<signature_data>
+        # Examples:
+        #   ed25519:k3JlZDI1NTE5OnNpZ25hdHVyZV9kYXRh...  (base64)
+        #   ed25519:mock:test_signature                 (mock for testing)
+        #   ecdsa:p256:sig_abc123...                    (future support)
+        #
+        # Regex breakdown:
+        #   ^(ed25519|ecdsa|rsa) - Algorithm prefix (currently only ed25519 verified)
+        #   :                    - Separator
+        #   .+$                  - Signature data (base64 or mock identifier)
         pattern = r'^(ed25519|ecdsa|rsa):.+$'
         return bool(re.match(pattern, signature))
 
@@ -845,7 +853,18 @@ class GenesisGraphValidator:
         if not isinstance(hash_str, str):
             return False
 
-        # Format: algorithm:hexdigest
+        # Hash format: <algorithm>:<hexdigest>
+        # Examples:
+        #   sha256:a3c8b9d1e2f3...  (64 hex chars for SHA-256)
+        #   sha512:f1e2d3c4b5a6...  (128 hex chars for SHA-512)
+        #   blake3:7f8e9d0c1b2a...  (64 hex chars for BLAKE3)
+        #
+        # Regex breakdown:
+        #   ^(sha256|sha512|blake3) - Supported hash algorithms
+        #   :                       - Separator
+        #   [a-f0-9]+$              - Hexadecimal digest (lowercase)
+        #
+        # Note: Length validation is not enforced here (allows truncated hashes)
         pattern = r'^(sha256|sha512|blake3):[a-f0-9]+$'
         return bool(re.match(pattern, hash_str))
 
@@ -858,14 +877,25 @@ class GenesisGraphValidator:
         declared_hash = entity['hash']
 
         # Security: Prevent path traversal attacks
-        # Normalize the path and check for directory traversal attempts
+        # ============================================
+        # Path traversal attacks try to access files outside the intended directory
+        # by using sequences like "../../../etc/passwd" or absolute paths.
+        #
+        # Defense strategy:
+        # 1. Normalize path (resolve . and .. components)
+        # 2. Reject absolute paths (e.g., /etc/passwd, C:\Windows\...)
+        # 3. Reject parent directory references (..)
+        # 4. Verify resolved path stays within document directory
+
         normalized_path = os.path.normpath(file_path)
 
-        # Reject absolute paths and parent directory references
+        # Check 1: Block absolute paths (Unix: /path, Windows: C:\path or \\network)
         if os.path.isabs(normalized_path):
             errors.append(f"Entity '{entity_id}': absolute paths not allowed for security reasons")
             return errors
 
+        # Check 2: Block parent directory traversal attempts
+        # Examples of blocked paths: ../secret.txt, foo/../../etc/passwd, ..\Windows\System32
         if normalized_path.startswith('..') or '/..' in normalized_path or '\\..'.replace('\\', os.sep) in normalized_path:
             errors.append(f"Entity '{entity_id}': parent directory references not allowed for security reasons")
             return errors
