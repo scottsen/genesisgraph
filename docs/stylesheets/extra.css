@@ -1,0 +1,178 @@
+/* GenesisGraph Documentation - Extra Styles */
+
+/* Custom color scheme for GenesisGraph brand */
+:root {
+  --gg-primary: #4a90e2;
+  --gg-accent: #7cb342;
+  --gg-warning: #ff9800;
+  --gg-error: #f44336;
+}
+
+/* Enhanced code blocks */
+.highlight {
+  border-left: 3px solid var(--gg-primary);
+}
+
+/* Custom admonition styles */
+.admonition.note {
+  border-left-color: var(--gg-primary);
+}
+
+.admonition.tip {
+  border-left-color: var(--gg-accent);
+}
+
+.admonition.warning {
+  border-left-color: var(--gg-warning);
+}
+
+.admonition.danger {
+  border-left-color: var(--gg-error);
+}
+
+/* Better table styling */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+table th {
+  background-color: var(--gg-primary);
+  color: white;
+  font-weight: 600;
+  padding: 12px;
+  text-align: left;
+}
+
+table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+table tr:hover {
+  background-color: rgba(74, 144, 226, 0.05);
+}
+
+/* Code block enhancements */
+.md-typeset code {
+  background-color: rgba(74, 144, 226, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.md-typeset pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Navigation breadcrumbs */
+.md-nav__link--active {
+  font-weight: 600;
+  color: var(--gg-primary);
+}
+
+/* Custom heading anchors */
+.headerlink {
+  color: var(--gg-accent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+h1:hover .headerlink,
+h2:hover .headerlink,
+h3:hover .headerlink,
+h4:hover .headerlink {
+  opacity: 1;
+}
+
+/* Enhanced search results */
+.md-search-result__article {
+  padding: 1em;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.md-search-result__article:hover {
+  border-left-color: var(--gg-primary);
+  background-color: rgba(74, 144, 226, 0.05);
+}
+
+/* Disclosure level badges */
+.disclosure-level-a {
+  background-color: #4caf50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.disclosure-level-b {
+  background-color: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.disclosure-level-c {
+  background-color: #f44336;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+/* Priority badges from roadmap */
+.priority-critical {
+  background-color: #d32f2f;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.priority-high {
+  background-color: #ff9800;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+.priority-medium {
+  background-color: #4caf50;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 0.85em;
+}
+
+/* Mermaid diagram improvements */
+.mermaid {
+  text-align: center;
+  background-color: transparent;
+}
+
+/* Footer customization */
+.md-footer-meta {
+  background-color: var(--gg-primary);
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+  table {
+    font-size: 0.9em;
+  }
+
+  table th,
+  table td {
+    padding: 8px;
+  }
+}
