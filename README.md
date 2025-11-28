@@ -25,6 +25,24 @@ GenesisGraph is an **open standard for proving how things were made**. It provid
 
 ---
 
+## Part of the Semantic Infrastructure Lab
+
+**GenesisGraph** is a production component of the [Semantic Infrastructure Lab (SIL)](https://github.com/semantic-infrastructure-lab/sil) — building the semantic substrate for intelligent systems.
+
+**Role in the Semantic OS:**
+- **Cross-Cutting:** Provenance infrastructure (enables verifiable transformations across all layers)
+
+**SIL Principles Applied:**
+- ✅ **Clarity** — Explicit process representation, no hidden transformations
+- ✅ **Simplicity** — Minimal standard (graphs, hashes, signatures)
+- ✅ **Composability** — Graphs compose, selective disclosure composes
+- ✅ **Correctness** — 363 tests, cryptographic verification
+- ✅ **Verifiability** — Core mission: provable computational correctness
+
+**Quick Links:** [SIL Manifesto](https://github.com/semantic-infrastructure-lab/sil/blob/main/docs/canonical/MANIFESTO.md) • [Unified Architecture](https://github.com/semantic-infrastructure-lab/sil/blob/main/docs/architecture/UNIFIED_ARCHITECTURE_GUIDE.md) • [Project Index](https://github.com/semantic-infrastructure-lab/sil/blob/main/projects/PROJECT_INDEX.md)
+
+---
+
 ## 🚀 Quick Start — Choose Your Path
 
 **New to GenesisGraph?** Follow this progressive learning path:
