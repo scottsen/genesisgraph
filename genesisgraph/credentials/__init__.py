@@ -14,27 +14,27 @@ by allowing verifiable claims without revealing underlying data.
 # Import predicates and ZKP templates (no external dependencies)
 from .predicates import PredicateProof, PredicateType, create_predicate
 from .zkp_templates import (
-    ZKPType,
+    TemplateType,
     ZKPProof,
     ZKPTemplate,
-    TemplateType,
-    create_range_proof,
-    create_threshold_proof,
-    create_set_membership_proof,
-    create_composite_proof,
+    ZKPType,
     apply_template,
-    verify_zkp_proof,
-    get_template,
-    list_templates,
-    get_ai_safety_template,
+    create_composite_proof,
+    create_range_proof,
+    create_set_membership_proof,
+    create_threshold_proof,
     get_ai_compliance_template,
+    get_ai_safety_template,
     get_manufacturing_qc_template,
     get_research_bounds_template,
+    get_template,
+    list_templates,
+    verify_zkp_proof,
 )
 
 # Optional imports (require additional dependencies)
 try:
-    from .sd_jwt import SDJWTIssuer, SDJWTVerifier, SDJWTError
+    from .sd_jwt import SDJWTError, SDJWTIssuer, SDJWTVerifier
     _SD_JWT_AVAILABLE = True
 except ImportError:
     _SD_JWT_AVAILABLE = False

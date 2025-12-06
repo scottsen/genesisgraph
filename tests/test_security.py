@@ -10,12 +10,18 @@ Tests security vulnerabilities and mitigations including:
 
 import os
 import tempfile
-import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
-from genesisgraph.validator import GenesisGraphValidator, MAX_ENTITIES, MAX_OPERATIONS, MAX_ID_LENGTH
-from genesisgraph.did_resolver import DIDResolver, BLOCKED_HOSTS, BLOCKED_NETWORKS
+import pytest
+
+from genesisgraph.did_resolver import DIDResolver
 from genesisgraph.errors import ValidationError
+from genesisgraph.validator import (
+    MAX_ENTITIES,
+    MAX_ID_LENGTH,
+    MAX_OPERATIONS,
+    GenesisGraphValidator,
+)
 
 
 class TestPathTraversalProtection:
@@ -267,7 +273,6 @@ class TestCacheTTL:
         assert did in resolver._cache
 
         # Simulate time passing
-        import time
         cached_value, cached_time = resolver._cache[did]
         resolver._cache[did] = (cached_value, cached_time - 2)  # Expire the cache
 
@@ -351,7 +356,7 @@ class TestDoSProtection:
 
     def test_base58_too_long_rejected(self):
         """Test that overly long base58 strings are rejected"""
-        from genesisgraph.did_resolver import DIDResolver, MAX_BASE58_LENGTH
+        from genesisgraph.did_resolver import MAX_BASE58_LENGTH, DIDResolver
 
         resolver = DIDResolver()
         long_base58 = '1' * (MAX_BASE58_LENGTH + 1)
@@ -364,7 +369,7 @@ class TestDoSProtection:
 
     def test_did_too_long_rejected(self):
         """Test that overly long DIDs are rejected"""
-        from genesisgraph.did_resolver import DIDResolver, MAX_DID_LENGTH
+        from genesisgraph.did_resolver import MAX_DID_LENGTH, DIDResolver
 
         resolver = DIDResolver()
         long_did = 'did:key:' + 'z' * (MAX_DID_LENGTH + 1)

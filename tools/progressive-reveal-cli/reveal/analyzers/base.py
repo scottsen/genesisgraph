@@ -1,7 +1,7 @@
 """Base analyzer interface."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 
 class BaseAnalyzer(ABC):
@@ -24,7 +24,6 @@ class BaseAnalyzer(ABC):
         Returns:
             Dictionary with structural information
         """
-        pass
 
     @abstractmethod
     def generate_preview(self) -> List[tuple[int, str]]:
@@ -34,4 +33,3 @@ class BaseAnalyzer(ABC):
         Returns:
             List of (line_number, content) tuples
         """
-        pass

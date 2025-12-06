@@ -10,12 +10,13 @@ Tests cover:
 
 import base64
 import json
+
 import pytest
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from genesisgraph.validator import GenesisGraphValidator
 from genesisgraph.did_resolver import DIDResolver, resolve_did_to_public_key
 from genesisgraph.errors import ValidationError
+from genesisgraph.validator import GenesisGraphValidator
 
 
 class TestDIDResolver:

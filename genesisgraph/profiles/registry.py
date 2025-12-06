@@ -5,8 +5,9 @@ Manages discovery and execution of industry-specific profile validators.
 """
 
 from typing import Dict, List, Optional, Type
-from .base import BaseProfileValidator, ProfileValidationResult
+
 from .ai_basic_v1 import AIBasicV1Validator
+from .base import BaseProfileValidator, ProfileValidationResult
 from .cam_v1 import CAMv1Validator
 
 
@@ -157,7 +158,7 @@ class ProfileRegistry:
         Returns:
             Dictionary with compliance results for each standard
         """
-        from ..compliance import ISO9001Validator, FDA21CFR11Validator
+        from ..compliance import FDA21CFR11Validator, ISO9001Validator
 
         results = {}
 

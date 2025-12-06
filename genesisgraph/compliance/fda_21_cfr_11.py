@@ -5,7 +5,7 @@ Validates GenesisGraph workflows for FDA 21 CFR Part 11 compliance
 (Electronic Records and Electronic Signatures).
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class FDA21CFR11Validator:
@@ -267,9 +267,8 @@ class FDA21CFR11Validator:
         """Determine the compliance level based on errors and warnings"""
         if len(self.errors) > 0:
             return "non-compliant"
-        elif len(self.warnings) == 0:
+        if len(self.warnings) == 0:
             return "fully-compliant"
-        elif len(self.warnings) <= 3:
+        if len(self.warnings) <= 3:
             return "substantially-compliant"
-        else:
-            return "partially-compliant"
+        return "partially-compliant"

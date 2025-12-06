@@ -1,13 +1,13 @@
 """Command-line interface for Progressive Reveal."""
 
-import sys
 import argparse
+import sys
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 
+from .analyzers import JSONAnalyzer, MarkdownAnalyzer, PythonAnalyzer, TextAnalyzer, YAMLAnalyzer
 from .core import FileSummary, create_file_summary
-from .analyzers import YAMLAnalyzer, JSONAnalyzer, MarkdownAnalyzer, PythonAnalyzer, TextAnalyzer
-from .formatters import format_metadata, format_structure, format_preview, format_full_content
+from .formatters import format_full_content, format_metadata, format_preview, format_structure
 from .grep_filter import apply_grep_filter
 
 

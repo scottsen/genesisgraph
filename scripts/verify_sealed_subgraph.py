@@ -12,12 +12,12 @@ Usage:
     python verify_sealed_subgraph.py <path-to-gg-file> [--node-id OP_ID]
 """
 
-import sys
-import yaml
 import hashlib
-import base64
-from typing import Dict, List, Optional, Tuple
+import sys
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
+import yaml
 
 
 @dataclass
@@ -272,13 +272,13 @@ def main():
     gg_file = sys.argv[1]
 
     try:
-        with open(gg_file, 'r') as f:
+        with open(gg_file) as f:
             gg_data = yaml.safe_load(f)
     except Exception as e:
         print(f"❌ Error loading file: {e}")
         sys.exit(1)
 
-    print(f"GenesisGraph Sealed Subgraph Verifier")
+    print("GenesisGraph Sealed Subgraph Verifier")
     print(f"File: {gg_file}")
     print(f"Spec version: {gg_data.get('spec_version', 'UNKNOWN')}")
     print(f"Profile: {gg_data.get('profile', 'NONE')}")

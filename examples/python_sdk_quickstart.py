@@ -5,7 +5,7 @@ GenesisGraph Python SDK Quickstart
 This example demonstrates how to use the Python SDK to build GenesisGraph documents.
 """
 
-from genesisgraph import GenesisGraph, Entity, Operation, Tool, Attestation
+from genesisgraph import Attestation, Entity, GenesisGraph, Operation, Tool
 
 
 def example_1_minimal_document():

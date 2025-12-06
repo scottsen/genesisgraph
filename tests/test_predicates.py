@@ -13,13 +13,13 @@ import pytest
 # Test if credentials module is available
 try:
     from genesisgraph.credentials.predicates import (
-        PredicateType,
         PredicateProof,
-        create_predicate,
-        verify_predicate,
-        create_range_proof,
+        PredicateType,
         batch_create_predicates,
         combine_with_sd_jwt,
+        create_predicate,
+        create_range_proof,
+        verify_predicate,
     )
     from genesisgraph.credentials.sd_jwt import SDJWTIssuer
     CREDENTIALS_AVAILABLE = True

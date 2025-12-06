@@ -9,16 +9,16 @@ Tests Certificate Transparency-style verification including:
 - Integration with GenesisGraph validator
 """
 
-import pytest
 import hashlib
-import base64
+
+import pytest
+
 from genesisgraph.transparency_log import (
-    RFC6962Verifier,
-    TransparencyLogVerifier,
-    TransparencyLogEntry,
     InvalidProofError,
     InvalidTreeError,
-    TransparencyLogError,
+    RFC6962Verifier,
+    TransparencyLogEntry,
+    TransparencyLogVerifier,
 )
 
 

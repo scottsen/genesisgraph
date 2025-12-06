@@ -5,7 +5,8 @@ Validates AI/ML pipeline workflows for compliance with best practices
 and regulatory requirements (FDA 21 CFR Part 11, etc.).
 """
 
-from typing import Dict, List, Set
+from typing import Dict, List
+
 from .base import BaseProfileValidator
 
 

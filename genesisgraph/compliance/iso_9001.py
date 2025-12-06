@@ -4,7 +4,7 @@ ISO 9001 Compliance Validator
 Validates GenesisGraph workflows for ISO 9001:2015 quality management compliance.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class ISO9001Validator:
@@ -245,9 +245,8 @@ class ISO9001Validator:
         """Determine the compliance level based on errors and warnings"""
         if len(self.errors) > 0:
             return "non-compliant"
-        elif len(self.warnings) == 0:
+        if len(self.warnings) == 0:
             return "fully-compliant"
-        elif len(self.warnings) <= 3:
+        if len(self.warnings) <= 3:
             return "substantially-compliant"
-        else:
-            return "partially-compliant"
+        return "partially-compliant"

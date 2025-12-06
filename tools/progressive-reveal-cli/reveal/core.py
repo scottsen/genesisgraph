@@ -1,11 +1,10 @@
 """Core data models and utilities for Progressive Reveal CLI."""
 
 import hashlib
-import os
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -43,7 +42,7 @@ def read_file_safe(file_path: Path, max_bytes: int = 2 * 1024 * 1024, force: boo
 
     try:
         # Try reading as UTF-8
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             content = f.read()
             lines = content.splitlines()
         return True, "", lines

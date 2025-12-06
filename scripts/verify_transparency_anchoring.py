@@ -11,12 +11,13 @@ Usage:
     python verify_transparency_anchoring.py <path-to-gg-file>
 """
 
-import sys
-import yaml
-import hashlib
 import base64
-from typing import Dict, List, Optional, Tuple
+import hashlib
+import sys
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
+
+import yaml
 
 
 @dataclass
@@ -165,7 +166,7 @@ class GenesisGraphTransparencyVerifier:
         tree_size = entry.get('tree_size', 0)
         inclusion_proof_b64 = entry.get('inclusion_proof', '')
 
-        messages.append(f"\n  Verifying transparency anchor:")
+        messages.append("\n  Verifying transparency anchor:")
         messages.append(f"    Log ID: {log_id}")
         messages.append(f"    Entry ID: {entry_id}")
         messages.append(f"    Tree size: {tree_size}")
@@ -190,7 +191,7 @@ class GenesisGraphTransparencyVerifier:
             try:
                 # Handle truncated examples (ending with ...)
                 if inclusion_proof_b64.endswith('...'):
-                    messages.append(f"    ⚠ Inclusion proof truncated (example data)")
+                    messages.append("    ⚠ Inclusion proof truncated (example data)")
                 else:
                     # Decode proof (in production, verify against log)
                     proof_data = base64.b64decode(inclusion_proof_b64, validate=True)
@@ -338,13 +339,13 @@ def main():
     gg_file = sys.argv[1]
 
     try:
-        with open(gg_file, 'r') as f:
+        with open(gg_file) as f:
             gg_data = yaml.safe_load(f)
     except Exception as e:
         print(f"❌ Error loading file: {e}")
         sys.exit(1)
 
-    print(f"GenesisGraph Transparency Anchoring Verifier")
+    print("GenesisGraph Transparency Anchoring Verifier")
     print(f"File: {gg_file}")
     print(f"Spec version: {gg_data.get('spec_version', 'UNKNOWN')}")
     print(f"Profile: {gg_data.get('profile', 'NONE')}")
@@ -353,12 +354,12 @@ def main():
 
     # Generate summary
     summary = verifier.generate_summary()
-    print(f"\n=== Transparency Summary ===")
+    print("\n=== Transparency Summary ===")
     print(f"Anchored operations: {summary['anchored_operations']}")
     print(f"Total anchors: {summary['total_anchors']}")
     print(f"Unique logs: {summary['unique_logs']}")
     if summary['log_ids']:
-        print(f"Log IDs:")
+        print("Log IDs:")
         for log_id in summary['log_ids']:
             print(f"  - {log_id}")
 

@@ -11,15 +11,13 @@ This makes GenesisGraph production-ready for aerospace/manufacturing use cases
 where verifiable audit trails and tamper-evident logging are critical.
 """
 
-import hashlib
 import base64
-import time
-import json
-from typing import Dict, List, Optional, Tuple, Union
+import hashlib
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import urljoin
-import requests
 
+import requests
 
 # Security limits for transparency log operations
 MAX_TREE_SIZE = 2**63 - 1  # Maximum tree size (practical limit)
@@ -31,22 +29,18 @@ MAX_PROOF_LENGTH = 1024 * 1024  # 1MB max proof size
 
 class TransparencyLogError(Exception):
     """Base exception for transparency log errors"""
-    pass
 
 
 class InvalidProofError(TransparencyLogError):
     """Raised when a proof verification fails"""
-    pass
 
 
 class InvalidTreeError(TransparencyLogError):
     """Raised when tree parameters are invalid"""
-    pass
 
 
 class LogFetchError(TransparencyLogError):
     """Raised when fetching from a transparency log fails"""
-    pass
 
 
 @dataclass
@@ -300,49 +294,48 @@ class RFC6962Verifier:
                     sn -= sn_power
 
             return new_hash == hash2
-        else:
-            # n1 is not a power of 2
-            if len(proof) == 0:
-                return False
+        # n1 is not a power of 2
+        if len(proof) == 0:
+            return False
 
-            # The proof should allow us to compute both old and new roots
-            # Split at the point where we have k leaves on left
-            b = RFC6962Verifier._count_bits(n1 - 1)
+        # The proof should allow us to compute both old and new roots
+        # Split at the point where we have k leaves on left
+        b = RFC6962Verifier._count_bits(n1 - 1)
 
-            # Compute hash of old tree
-            old_hash = proof[0]
-            for i in range(1, b):
-                old_hash = RFC6962Verifier.hash_children(proof[i], old_hash)
+        # Compute hash of old tree
+        old_hash = proof[0]
+        for i in range(1, b):
+            old_hash = RFC6962Verifier.hash_children(proof[i], old_hash)
 
-            if old_hash != hash1:
-                return False
+        if old_hash != hash1:
+            return False
 
-            # Compute hash of new tree
-            new_hash = proof[0]
-            fn = k
-            sn = n1 - k
+        # Compute hash of new tree
+        new_hash = proof[0]
+        fn = k
+        sn = n1 - k
 
-            for i in range(1, len(proof)):
-                if fn == n2:
-                    # Reached the end
-                    break
+        for i in range(1, len(proof)):
+            if fn == n2:
+                # Reached the end
+                break
 
-                if sn == 0:
-                    # Only left subtree
+            if sn == 0:
+                # Only left subtree
+                new_hash = RFC6962Verifier.hash_children(new_hash, proof[i])
+                fn *= 2
+            else:
+                # Have both subtrees
+                sn_power = RFC6962Verifier._get_power_of_2(sn)
+                if fn + sn_power <= n2:
                     new_hash = RFC6962Verifier.hash_children(new_hash, proof[i])
-                    fn *= 2
+                    fn += sn_power
+                    sn -= sn_power
                 else:
-                    # Have both subtrees
-                    sn_power = RFC6962Verifier._get_power_of_2(sn)
-                    if fn + sn_power <= n2:
-                        new_hash = RFC6962Verifier.hash_children(new_hash, proof[i])
-                        fn += sn_power
-                        sn -= sn_power
-                    else:
-                        new_hash = RFC6962Verifier.hash_children(proof[i], new_hash)
-                        sn = n2 - fn
+                    new_hash = RFC6962Verifier.hash_children(proof[i], new_hash)
+                    sn = n2 - fn
 
-            return new_hash == hash2
+        return new_hash == hash2
 
     @staticmethod
     def _get_power_of_2(n: int) -> int:

@@ -6,7 +6,7 @@ Provides the base class and interface for industry-specific profile validators.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Set
 
 
 @dataclass
@@ -132,7 +132,6 @@ class BaseProfileValidator(ABC):
         Returns:
             List of error messages
         """
-        pass
 
     @abstractmethod
     def _validate_tools(self, tools: List[Dict]) -> List[str]:
@@ -145,7 +144,6 @@ class BaseProfileValidator(ABC):
         Returns:
             List of error messages
         """
-        pass
 
     def _validate_custom(self, data: Dict[str, Any]) -> List[str]:
         """

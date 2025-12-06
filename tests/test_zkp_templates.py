@@ -11,24 +11,23 @@ Tests comprehensive ZKP template functionality including:
 """
 
 import pytest
+
 from genesisgraph.credentials.zkp_templates import (
-    ZKPType,
-    ZKPProof,
-    ZKPTemplate,
     TemplateType,
-    create_range_proof,
-    create_threshold_proof,
-    create_set_membership_proof,
-    create_composite_proof,
-    create_commitment,
+    ZKPType,
     apply_template,
-    verify_zkp_proof,
-    get_template,
-    list_templates,
-    get_ai_safety_template,
+    create_commitment,
+    create_composite_proof,
+    create_range_proof,
+    create_set_membership_proof,
+    create_threshold_proof,
     get_ai_compliance_template,
+    get_ai_safety_template,
     get_manufacturing_qc_template,
     get_research_bounds_template,
+    get_template,
+    list_templates,
+    verify_zkp_proof,
 )
 
 

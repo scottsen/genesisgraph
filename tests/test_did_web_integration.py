@@ -8,9 +8,9 @@ Tests complete did:web resolution flow including:
 - End-to-end signature verification with did:web
 """
 
-import json
 import base64
 from unittest.mock import Mock, patch
+
 import pytest
 
 from genesisgraph.did_resolver import DIDResolver

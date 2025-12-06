@@ -13,10 +13,10 @@ For production zero-knowledge range proofs, consider Bulletproofs or zkSNARKs.
 
 import hashlib
 import json
+import secrets
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass
-import secrets
 
 
 class PredicateType(Enum):
@@ -229,23 +229,22 @@ def _evaluate_predicate(value: Any, predicate_type: PredicateType, threshold: An
     """Evaluate a predicate"""
     if predicate_type == PredicateType.LESS_THAN:
         return value < threshold
-    elif predicate_type == PredicateType.LESS_THAN_OR_EQUAL:
+    if predicate_type == PredicateType.LESS_THAN_OR_EQUAL:
         return value <= threshold
-    elif predicate_type == PredicateType.GREATER_THAN:
+    if predicate_type == PredicateType.GREATER_THAN:
         return value > threshold
-    elif predicate_type == PredicateType.GREATER_THAN_OR_EQUAL:
+    if predicate_type == PredicateType.GREATER_THAN_OR_EQUAL:
         return value >= threshold
-    elif predicate_type == PredicateType.EQUAL:
+    if predicate_type == PredicateType.EQUAL:
         return value == threshold
-    elif predicate_type == PredicateType.NOT_EQUAL:
+    if predicate_type == PredicateType.NOT_EQUAL:
         return value != threshold
-    elif predicate_type == PredicateType.IN_RANGE:
+    if predicate_type == PredicateType.IN_RANGE:
         min_val, max_val = threshold
         return min_val <= value <= max_val
-    elif predicate_type == PredicateType.IN_SET:
+    if predicate_type == PredicateType.IN_SET:
         return value in threshold
-    else:
-        raise ValueError(f"Unknown predicate type: {predicate_type}")
+    raise ValueError(f"Unknown predicate type: {predicate_type}")
 
 
 def _create_commitment(value: Any, salt: str) -> str:

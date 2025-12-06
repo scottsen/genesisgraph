@@ -10,15 +10,15 @@ Reference: https://datatracker.ietf.org/doc/html/draft-ietf-oauth-selective-disc
 
 import json
 import time
-from typing import Any, Dict, List, Optional, Set, Union
-from datetime import datetime, timedelta
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 try:
-    from sd_jwt.issuer import SDJWTIssuer as BaseSDJWTIssuer
-    from sd_jwt.verifier import SDJWTVerifier as BaseSDJWTVerifier
-    from sd_jwt.common import SDObj
     from jwcrypto import jwk, jwt
     from jwcrypto.common import json_encode
+    from sd_jwt.common import SDObj
+    from sd_jwt.issuer import SDJWTIssuer as BaseSDJWTIssuer
+    from sd_jwt.verifier import SDJWTVerifier as BaseSDJWTVerifier
 except ImportError as e:
     raise ImportError(
         "SD-JWT dependencies not installed. "
@@ -28,7 +28,6 @@ except ImportError as e:
 
 class SDJWTError(Exception):
     """Base exception for SD-JWT operations"""
-    pass
 
 
 class SDJWTIssuer:
@@ -174,7 +173,6 @@ class SDJWTIssuer:
         - salt: Random salt for hash commitment
         """
         import hashlib
-        import base64
         import secrets
 
         disclosures = []

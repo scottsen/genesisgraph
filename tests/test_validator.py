@@ -1,8 +1,8 @@
 """Tests for GenesisGraph validator"""
 
 import pytest
+
 from genesisgraph import GenesisGraphValidator, validate
-from genesisgraph.errors import ValidationError, SchemaError
 
 
 class TestGenesisGraphValidator:
@@ -539,8 +539,8 @@ class TestHashVerification:
 
     def test_file_hash_verification_nonexistent_file(self):
         """Test hash verification for nonexistent file"""
-        import tempfile
         import os
+        import tempfile
 
         data = {
             'spec_version': '0.1.0',
@@ -571,9 +571,9 @@ class TestHashVerification:
 
     def test_file_hash_verification_correct_hash(self):
         """Test hash verification with correct hash"""
-        import tempfile
-        import os
         import hashlib
+        import os
+        import tempfile
 
         # Create a test file with known content
         test_content = b'test content for hash verification'
@@ -616,8 +616,8 @@ class TestHashVerification:
 
     def test_file_hash_verification_incorrect_hash(self):
         """Test hash verification with incorrect hash"""
-        import tempfile
         import os
+        import tempfile
 
         # Create a test file
         test_content = b'test content'
@@ -660,8 +660,8 @@ class TestHashVerification:
 
     def test_blake3_hash_verification_correct_hash(self):
         """Test blake3 hash verification with correct hash"""
-        import tempfile
         import os
+        import tempfile
 
         try:
             import blake3
@@ -711,8 +711,8 @@ class TestHashVerification:
 
     def test_blake3_hash_verification_without_library(self):
         """Test blake3 hash verification when library not installed"""
-        import tempfile
         import os
+        import tempfile
         from unittest.mock import patch
 
         # Create temp directory to hold both files
@@ -762,7 +762,7 @@ class TestExampleFiles:
     def test_level_a_example_structure(self):
         """Test level A example has valid structure (ignoring file refs)"""
         import yaml
-        with open('examples/level-a-full-disclosure.gg.yaml', 'r') as f:
+        with open('examples/level-a-full-disclosure.gg.yaml') as f:
             data = yaml.safe_load(f)
 
         # Basic structure checks
@@ -779,7 +779,7 @@ class TestExampleFiles:
     def test_level_b_example_structure(self):
         """Test level B example has valid structure"""
         import yaml
-        with open('examples/level-b-partial-envelope.gg.yaml', 'r') as f:
+        with open('examples/level-b-partial-envelope.gg.yaml') as f:
             data = yaml.safe_load(f)
 
         # Basic structure checks
@@ -791,7 +791,7 @@ class TestExampleFiles:
     def test_level_c_example_structure(self):
         """Test level C example has valid structure"""
         import yaml
-        with open('examples/level-c-sealed-subgraph.gg.yaml', 'r') as f:
+        with open('examples/level-c-sealed-subgraph.gg.yaml') as f:
             data = yaml.safe_load(f)
 
         # Basic structure checks

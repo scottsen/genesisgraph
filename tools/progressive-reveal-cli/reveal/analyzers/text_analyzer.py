@@ -1,6 +1,7 @@
 """Text file analyzer."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from .base import BaseAnalyzer
 
 

@@ -6,9 +6,10 @@ duplication across test files.
 """
 
 import json
-import tempfile
 import os
+import tempfile
 from unittest.mock import Mock
+
 import pytest
 import yaml
 

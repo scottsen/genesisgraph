@@ -46,9 +46,9 @@ except ImportError:
     TRANSPARENCY_LOG_AVAILABLE = False
 
 try:
-    from .credentials.sd_jwt import SDJWTVerifier, SDJWTError
-    from .credentials.predicates import verify_predicate, PredicateProof
     from .credentials.bbs_plus import BBSPlusVerifier
+    from .credentials.predicates import PredicateProof, verify_predicate
+    from .credentials.sd_jwt import SDJWTError, SDJWTVerifier
     SD_JWT_AVAILABLE = True
 except ImportError:
     SD_JWT_AVAILABLE = False
@@ -464,13 +464,12 @@ class GenesisGraphValidator:
                     )
                 elif not self._is_valid_signature_format(signature):
                     errors.append(f"{context}: invalid signature format: {signature}")
-                else:
-                    # Optionally verify signature cryptographically
-                    if self.verify_signatures and operation_data:
-                        # Note: This is a basic implementation that requires public keys to be provided
-                        # In production, you'd look up keys from a key store or DID registry
-                        sig_errors = self._verify_signature(attestation, operation_data, context)
-                        errors.extend(sig_errors)
+                # Optionally verify signature cryptographically
+                elif self.verify_signatures and operation_data:
+                    # Note: This is a basic implementation that requires public keys to be provided
+                    # In production, you'd look up keys from a key store or DID registry
+                    sig_errors = self._verify_signature(attestation, operation_data, context)
+                    errors.extend(sig_errors)
 
         # SD-JWT mode validation
         elif mode == 'sd-jwt':

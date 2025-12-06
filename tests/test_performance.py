@@ -4,10 +4,12 @@ Performance benchmarks for GenesisGraph validation
 Run with: pytest tests/test_performance.py --benchmark-only
 """
 
-import pytest
 import tempfile
-import yaml
 from pathlib import Path
+
+import pytest
+import yaml
+
 from genesisgraph.validator import GenesisGraphValidator
 
 
@@ -152,7 +154,7 @@ def test_file_parsing_and_validation(benchmark, small_document):
     with tempfile.NamedTemporaryFile(mode='w', suffix='.gg.yaml', delete=False) as f:
         yaml.dump(small_document, f)
         temp_path = f.name
-    
+
     try:
         validator = GenesisGraphValidator()
         result = benchmark(validator.validate_file, temp_path)
@@ -169,7 +171,7 @@ def test_multiple_validations(benchmark, validator, small_document):
             result = validator.validate(small_document)
             results.append(result)
         return results
-    
+
     results = benchmark(validate_multiple)
     assert all(r.is_valid for r in results)
 
@@ -189,7 +191,7 @@ def test_validation_with_signatures(benchmark, small_document):
         }
         for op in small_document['operations']
     ]
-    
+
     validator = GenesisGraphValidator(verify_signatures=True)
     result = benchmark(validator.validate, small_document)
     # Mock signatures should pass format validation
@@ -222,7 +224,7 @@ def test_performance_regression_baseline(benchmark, validator, medium_document):
     """
     result = benchmark(validator.validate, medium_document)
     assert result.is_valid
-    
+
     # Check that benchmark completed in reasonable time
     # pytest-benchmark will track this over time
 
@@ -258,7 +260,6 @@ def test_blake3_hash_computation_performance(benchmark):
     except ImportError:
         pytest.skip("blake3 not installed")
 
-    import hashlib
     import tempfile
 
     # Create a 1MB test file

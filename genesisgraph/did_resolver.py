@@ -19,8 +19,8 @@ References:
 
 import base64
 import json
-from typing import Any, Dict, List, Optional, Tuple
 from time import time
+from typing import Dict, List, Optional, Tuple
 
 try:
     import requests
@@ -137,9 +137,8 @@ class DIDResolver:
             # Check if cache entry is still valid
             if time() - cached_time < self.cache_ttl:
                 return cached_value
-            else:
-                # Expired - remove from cache
-                del self._cache[cache_key]
+            # Expired - remove from cache
+            del self._cache[cache_key]
 
         # Extract DID method
         if not did.startswith('did:'):
@@ -577,7 +576,7 @@ class DIDResolver:
                 except ValidationError:
                     continue
             # If no default worked, try with empty/first key
-            raise ValidationError(f"Could not find public key in did:ethr document with common key IDs")
+            raise ValidationError("Could not find public key in did:ethr document with common key IDs")
 
         return self._extract_public_key_from_document(did_document, key_id)
 

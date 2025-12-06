@@ -9,9 +9,10 @@ Tests complete resolution flow including:
 - Error handling and edge cases
 """
 
-import json
 import base64
+import json
 from unittest.mock import Mock, patch
+
 import pytest
 
 from genesisgraph.did_resolver import DIDResolver

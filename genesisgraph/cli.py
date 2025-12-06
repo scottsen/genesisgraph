@@ -6,7 +6,6 @@ Command-line interface for GenesisGraph validation and verification.
 """
 
 import sys
-from pathlib import Path
 from typing import Optional
 
 try:
@@ -15,16 +14,14 @@ try:
 except ImportError:
     CLICK_AVAILABLE = False
 
-from .validator import GenesisGraphValidator
 from . import __version__
-
+from .validator import GenesisGraphValidator
 
 if CLICK_AVAILABLE:
     @click.group()
     @click.version_option(version=__version__)
     def cli():
         """GenesisGraph: Universal Verifiable Process Provenance"""
-        pass
 
     @cli.command()
     @click.argument('file_path', type=click.Path(exists=True))
@@ -72,7 +69,7 @@ if CLICK_AVAILABLE:
         import yaml
 
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 data = yaml.safe_load(f)
         except Exception as e:
             click.echo(f"❌ Error loading file: {e}", err=True)
@@ -86,7 +83,7 @@ if CLICK_AVAILABLE:
         operations = data.get('operations', [])
         tools = data.get('tools', [])
 
-        click.echo(f"\nContent:")
+        click.echo("\nContent:")
         click.echo(f"  Entities: {len(entities)}")
         click.echo(f"  Operations: {len(operations)}")
         click.echo(f"  Tools: {len(tools)}")
@@ -98,7 +95,7 @@ if CLICK_AVAILABLE:
                 op_type = op.get('type', 'unknown')
                 op_types[op_type] = op_types.get(op_type, 0) + 1
 
-            click.echo(f"\nOperation types:")
+            click.echo("\nOperation types:")
             for op_type, count in sorted(op_types.items()):
                 click.echo(f"  {op_type}: {count}")
 
@@ -145,7 +142,7 @@ else:
             file_path = sys.argv[2]
 
             try:
-                with open(file_path, 'r') as f:
+                with open(file_path) as f:
                     data = yaml.safe_load(f)
             except Exception as e:
                 print(f"❌ Error loading file: {e}")
@@ -202,7 +199,7 @@ def main():
             file_path = sys.argv[2]
 
             try:
-                with open(file_path, 'r') as f:
+                with open(file_path) as f:
                     data = yaml.safe_load(f)
             except Exception as e:
                 print(f"❌ Error loading file: {e}")

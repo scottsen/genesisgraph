@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-
 FILE_TYPE_MAP = {
     '.yaml': 'yaml',
     '.yml': 'yaml',

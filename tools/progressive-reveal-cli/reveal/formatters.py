@@ -1,6 +1,7 @@
 """Output formatting utilities."""
 
-from typing import List, Optional, Dict, Any
+from typing import Any, Dict, List, Optional
+
 from .core import FileSummary
 
 

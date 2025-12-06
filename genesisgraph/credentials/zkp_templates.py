@@ -26,10 +26,10 @@ or similar cryptographic libraries.
 import hashlib
 import json
 import secrets
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple, Union
+from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class ZKPType(Enum):

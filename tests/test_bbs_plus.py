@@ -14,9 +14,9 @@ import pytest
 try:
     from genesisgraph.credentials.bbs_plus import (
         BBSPlusIssuer,
-        BBSPlusVerifier,
-        BBSPlusSignature,
         BBSPlusProof,
+        BBSPlusSignature,
+        BBSPlusVerifier,
         compare_disclosure_methods,
     )
     CREDENTIALS_AVAILABLE = True

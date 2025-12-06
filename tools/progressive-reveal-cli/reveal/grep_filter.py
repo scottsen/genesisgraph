@@ -1,7 +1,7 @@
 """Grep filtering utilities."""
 
 import re
-from typing import List, Optional
+from typing import List
 
 
 def apply_grep_filter(

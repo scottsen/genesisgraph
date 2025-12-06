@@ -2,11 +2,10 @@
 Tests for industry-specific profile validators
 """
 
-import pytest
+from genesisgraph.compliance import FDA21CFR11Validator, ISO9001Validator
 from genesisgraph.profiles import ProfileRegistry
 from genesisgraph.profiles.ai_basic_v1 import AIBasicV1Validator
 from genesisgraph.profiles.cam_v1 import CAMv1Validator
-from genesisgraph.compliance import ISO9001Validator, FDA21CFR11Validator
 
 
 class TestAIBasicV1Validator:

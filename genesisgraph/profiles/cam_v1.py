@@ -5,7 +5,8 @@ Validates manufacturing workflows for compliance with ISO-9001 quality standards
 and industry best practices.
 """
 
-from typing import Dict, List, Set
+from typing import Dict, List
+
 from .base import BaseProfileValidator
 
 

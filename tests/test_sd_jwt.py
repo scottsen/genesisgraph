@@ -8,14 +8,16 @@ Tests cover:
 - Security and error handling
 """
 
-import pytest
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
+
+import pytest
 
 # Test if credentials module is available
 try:
-    from genesisgraph.credentials.sd_jwt import SDJWTIssuer, SDJWTVerifier, SDJWTError
     from jwcrypto import jwk
+
+    from genesisgraph.credentials.sd_jwt import SDJWTError, SDJWTIssuer, SDJWTVerifier
     CREDENTIALS_AVAILABLE = True
 except ImportError:
     CREDENTIALS_AVAILABLE = False

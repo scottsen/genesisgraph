@@ -1,7 +1,8 @@
 """JSON file analyzer."""
 
 import json
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from .base import BaseAnalyzer
 
 
@@ -79,12 +80,11 @@ class JSONAnalyzer(BaseAnalyzer):
             if not obj:
                 return current_depth
             return max(self._calculate_depth(v, current_depth + 1) for v in obj.values())
-        elif isinstance(obj, list):
+        if isinstance(obj, list):
             if not obj:
                 return current_depth
             return max(self._calculate_depth(item, current_depth + 1) for item in obj)
-        else:
-            return current_depth
+        return current_depth
 
     def _count_value_types(self, obj: Any) -> Dict[str, int]:
         """Count value types in JSON."""

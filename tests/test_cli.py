@@ -1,10 +1,10 @@
 """Tests for GenesisGraph CLI"""
 
+import os
 import sys
 import tempfile
-import os
-from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
 import pytest
 import yaml
 
