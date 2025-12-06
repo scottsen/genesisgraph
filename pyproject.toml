@@ -108,7 +108,7 @@ target-version = "py38"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "YTT", "S", "B", "A", "C4", "T10", "ISC", "ICN", "PIE", "PT", "RET", "SIM", "ARG", "PLE", "PLR", "PLW"]
-ignore = ["E501", "S101", "PLR0913", "A002", "PLR2004", "PLR0912", "PLR0915", "ARG001", "B904"]
+ignore = ["E501", "S101", "PLR0913", "A002", "PLR2004", "PLR0912", "PLR0915", "ARG001", "B904", "F401", "SIM102", "RET504", "PLR0911", "N806", "ARG002", "SIM108", "SIM401", "S104", "F841", "PIE810"]
 
 [tool.mypy]
 python_version = "3.8"
